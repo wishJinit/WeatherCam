@@ -26,7 +26,7 @@
   * Kotlin
 
  ### Version
-  * Android 4.1(Jelly Bean) 이후부터 사용 가능
+ * Android 5.0(Lollipop) 이후부터 사용 가능
   
  ### Library 출처
   * https://github.com/Zomato/AndroidPhotoFilters
