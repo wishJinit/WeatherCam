@@ -4,6 +4,7 @@ import android.graphics.SurfaceTexture
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.TextureView
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     init {
@@ -11,7 +12,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object{
-        private lateinit var mTextureView:TextureView
         private lateinit var mSurfaceTextureListener:TextureView.SurfaceTextureListener
     }
 
@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mTextureView = findViewById(R.id.textureView)
         mSurfaceTextureListener = object:TextureView.SurfaceTextureListener{
             override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
 
@@ -34,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        mTextureView.surfaceTextureListener = mSurfaceTextureListener
+        textureView.surfaceTextureListener = mSurfaceTextureListener
     }
 
     private fun openCamera() {
