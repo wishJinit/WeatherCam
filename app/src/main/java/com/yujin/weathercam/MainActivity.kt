@@ -12,6 +12,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object{
+        private val TAG = "MainActivity"
         private lateinit var mSurfaceTextureListener:TextureView.SurfaceTextureListener
     }
 
