@@ -1,7 +1,11 @@
 package com.yujin.weathercam
 
 import android.Manifest
+import android.content.Context
 import android.graphics.SurfaceTexture
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.TextureView
@@ -19,6 +23,10 @@ class MainActivity : AppCompatActivity() {
         private val TAG = "MainActivity"
         const val REQUEST_CAMERA_PERMISSION:Int = 200
         private lateinit var mSurfaceTextureListener:TextureView.SurfaceTextureListener
+    }
+
+    private val cameraManager by lazy {
+        this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 
 
@@ -50,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkCameraPermission(){
         if(EasyPermissions.hasPermissions(this.applicationContext, Manifest.permission.CAMERA)){
             Log.d(TAG, "This App has the CAMERA permission")
+            connectionCamera()
         }else{
             EasyPermissions.requestPermissions(this,
                 getString(R.string.request_camera_permission),
@@ -58,6 +67,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 요청 키 값에 따라, 카메라 렌즈방향/지원 사진크기 를 반환하여 준다.
+     */
+    private fun <T> cameraCharacteristics(cameraId:String, key:CameraCharacteristics.Key<T>): T? {
+        val characteristics= cameraManager.getCameraCharacteristics(cameraId)
+        return when (key){
+            CameraCharacteristics.LENS_FACING -> characteristics.get(key)
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP -> characteristics.get(key)
+            else -> throw IllegalArgumentException("정상적인 키 값이 필요합니다.")
+        }
+    }
+
+    /**
+     * 카메라 ID값을 반환한다.
+     */
+    private fun cameraId(lens:Int) :String{
+        var deviceId = listOf<String>()
+        try{
+            val cameraIdList = cameraManager.cameraIdList
+            deviceId = cameraIdList.filter { lens == cameraCharacteristics(it, CameraCharacteristics.LENS_FACING) }
+        } catch (e: CameraAccessException){
+            Log.e(TAG, e.toString())
+        }
+        return deviceId[0]
+    }
+
+    /**
+     * 카메라를 연결한다.
+     */
+    private fun connectionCamera(){
+        val deviceId = cameraId(CameraCharacteristics.LENS_FACING_BACK)
+        Log.d(TAG, "deviceId : $deviceId")
+    }
+
+    /**
+     * 카메라 오픈을 요청한다.
+     */
     private fun openCamera() {
         checkCameraPermission()
     }
