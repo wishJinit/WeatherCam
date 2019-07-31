@@ -1,13 +1,17 @@
 package com.yujin.weathercam
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
 import android.view.TextureView
 import com.yujin.weathercam.Util.Log
 import kotlinx.android.synthetic.main.activity_main.*
@@ -25,8 +29,30 @@ class MainActivity : AppCompatActivity() {
         private lateinit var mSurfaceTextureListener:TextureView.SurfaceTextureListener
     }
 
+    private lateinit var backgroundHandler: Handler
+    private lateinit var cameraDevice:CameraDevice
+
     private val cameraManager by lazy {
         this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }
+
+    private val deviceStateCallback = object: CameraDevice.StateCallback(){
+        override fun onOpened(camera: CameraDevice) {
+            Log.d(TAG, "Camera Device Opened")
+            camera?.let {
+                cameraDevice = it
+            }
+        }
+
+        override fun onDisconnected(camera: CameraDevice) {
+            Log.d(TAG, "Camera Device Disconnected")
+            camera?.let { it.close()}
+        }
+
+        override fun onError(camera: CameraDevice, error: Int) {
+            Log.e(TAG, "camera device error (code : $error)")
+        }
+
     }
 
 
@@ -96,9 +122,17 @@ class MainActivity : AppCompatActivity() {
     /**
      * 카메라를 연결한다.
      */
+    @SuppressLint("MissingPermission")
     private fun connectionCamera(){
         val deviceId = cameraId(CameraCharacteristics.LENS_FACING_BACK)
         Log.d(TAG, "deviceId : $deviceId")
+        try{
+            cameraManager.openCamera(deviceId, deviceStateCallback, backgroundHandler)
+        }catch (e:CameraAccessException){
+            Log.e(TAG, e.toString())
+        }catch (e:InterruptedException){
+            Log.e(TAG, "Open camera device interrupted while opened")
+        }
     }
 
     /**
