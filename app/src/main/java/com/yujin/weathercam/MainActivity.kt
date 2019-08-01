@@ -4,19 +4,18 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.SurfaceTexture
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraDevice
-import android.hardware.camera2.CameraManager
+import android.hardware.camera2.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.view.Surface
 import android.view.TextureView
 import com.yujin.weathercam.Util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     init {
@@ -29,6 +28,10 @@ class MainActivity : AppCompatActivity() {
         private lateinit var mSurfaceTextureListener:TextureView.SurfaceTextureListener
     }
 
+    private val MAX_PREVIEW_WIDTH = 720
+    private val MAX_PREVIEW_HEIGHT = 1280
+    private lateinit var captureSession: CameraCaptureSession
+    private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var backgroundHandler: Handler
     private lateinit var cameraDevice:CameraDevice
 
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Camera Device Opened")
             camera?.let {
                 cameraDevice = it
+                previewSession()
             }
         }
 
@@ -53,6 +57,34 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "camera device error (code : $error)")
         }
 
+    }
+
+    /**
+     * preview에 대한 세션을 요청하고 생성한다.
+     */
+    private fun previewSession(){
+        val surfaceTexture = textureView.surfaceTexture
+        surfaceTexture.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
+        val surface = Surface(surfaceTexture)
+
+        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+        captureRequestBuilder.addTarget(surface)
+
+        cameraDevice.createCaptureSession(Arrays.asList(surface),
+            object : CameraCaptureSession.StateCallback(){
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    Log.e(TAG, "Create capture session failed!")
+                }
+
+                override fun onConfigured(session: CameraCaptureSession) {
+                    session?.let {
+                        captureSession = it
+                        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                        captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
+                    }
+                }
+
+            }, null)
     }
 
 
