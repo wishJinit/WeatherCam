@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var backgroundHandler: Handler
+    private lateinit var backgroundThread: HandlerThread
     private lateinit var cameraDevice:CameraDevice
 
     private val cameraManager by lazy {
@@ -59,35 +60,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    /**
-     * preview에 대한 세션을 요청하고 생성한다.
-     */
-    private fun previewSession(){
-        val surfaceTexture = textureView.surfaceTexture
-        surfaceTexture.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
-        val surface = Surface(surfaceTexture)
-
-        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-        captureRequestBuilder.addTarget(surface)
-
-        cameraDevice.createCaptureSession(Arrays.asList(surface),
-            object : CameraCaptureSession.StateCallback(){
-                override fun onConfigureFailed(session: CameraCaptureSession) {
-                    Log.e(TAG, "Create capture session failed!")
-                }
-
-                override fun onConfigured(session: CameraCaptureSession) {
-                    session?.let {
-                        captureSession = it
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
-                    }
-                }
-
-            }, null)
-    }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -100,14 +72,73 @@ class MainActivity : AppCompatActivity() {
             override fun onSurfaceTextureDestroyed(p0: SurfaceTexture?): Boolean = true
 
             override fun onSurfaceTextureAvailable(p0: SurfaceTexture?, p1: Int, p2: Int) {
-                openCamera();
+                openCamera()
             }
 
         }
 
+        initTextureView()
+    }
+
+    /**
+     * 퍼미션에 대한 사용자의 응답을 처리한다.
+     */
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startBackgroundThread()
+        if(textureView.isAvailable){
+            openCamera()
+        }else{
+            initTextureView()
+        }
+    }
+
+    override fun onPause() {
+        closeCamera()
+        stopBackgroundThread()
+        super.onPause()
+    }
+
+    private fun initTextureView() {
         textureView.surfaceTextureListener = mSurfaceTextureListener
     }
 
+    /**
+     * preview에 대한 세션을 요청하고 생성한다.
+     */
+    private fun previewSession(){
+        val surfaceTexture = textureView.surfaceTexture
+        surfaceTexture.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
+        val surface = Surface(surfaceTexture)
+
+        captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+        captureRequestBuilder.addTarget(surface)
+
+        cameraDevice.createCaptureSession(Arrays.asList(surface),
+            object : CameraCaptureSession.StateCallback() {
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    Log.e(TAG, "Create capture session failed!")
+                }
+
+                override fun onConfigured(session: CameraCaptureSession) {
+                    session?.let {
+                        captureSession = it
+                        captureRequestBuilder.set(
+                            CaptureRequest.CONTROL_AF_MODE,
+                            CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                        )
+                        captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
+                    }
+                }
+
+            }, null
+        )
+    }
 
     /**
      * 카메라 퍼미션을 체크한다.
@@ -173,4 +204,38 @@ class MainActivity : AppCompatActivity() {
     private fun openCamera() {
         checkCameraPermission()
     }
+
+    /**
+     * 카메라를 닫는다.
+     */
+    private fun closeCamera(){
+        if(this::captureSession.isInitialized)
+            captureSession.close()
+        if(this::cameraDevice.isInitialized)
+            cameraDevice.close()
+    }
+
+    /**
+     * 카메라에 대한 요청을 처리하기 위한 background thread를 생성한다.
+     */
+    private fun startBackgroundThread(){
+        backgroundThread = HandlerThread("CameraHandlerThread").also { it.start() }
+        backgroundHandler = Handler(backgroundThread.looper)
+    }
+
+    /**
+     * 카메라에 대한 요청을 처리하던 background thread를 정지시킨다.
+     */
+    private fun stopBackgroundThread(){
+        backgroundThread?.let {
+            it.quitSafely()
+            try{
+                it.join()
+            }catch (e:InterruptedException){
+                Log.d(TAG, e.toString())
+            }
+
+        }
+    }
+
 }
