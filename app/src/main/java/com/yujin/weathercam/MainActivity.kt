@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
 import android.view.TextureView
+import android.widget.Toast
 import com.yujin.weathercam.Camera.CompareSizesByArea
 import com.yujin.weathercam.Camera.ImageSaver
 import com.yujin.weathercam.Util.Log
@@ -367,6 +368,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onCaptureCompleted(session: CameraCaptureSession,
                                                 request: CaptureRequest,
                                                 result: TotalCaptureResult) {
+                    Toast.makeText(applicationContext, "Saved: $file", Toast.LENGTH_SHORT).show()
                     Log.d(TAG, file.toString())
                     unlockFocus()
                 }
