@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity() {
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         captureRequestBuilder.addTarget(surface)
 
-        cameraDevice.createCaptureSession(Arrays.asList(surface),
+        cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader?.surface),
             object : CameraCaptureSession.StateCallback() {
                 override fun onConfigureFailed(session: CameraCaptureSession) {
                     Log.e(TAG, "Create capture session failed!")
