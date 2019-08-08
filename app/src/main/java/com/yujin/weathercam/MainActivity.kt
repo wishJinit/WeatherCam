@@ -28,13 +28,13 @@ class MainActivity : AppCompatActivity() {
         System.loadLibrary("NativeImageProcessor")
     }
 
-    companion object{
+    companion object {
         private val TAG = "MainActivity"
-        const val REQUEST_CAMERA_PERMISSION:Int = 200
-        private lateinit var mSurfaceTextureListener:TextureView.SurfaceTextureListener
+        const val REQUEST_CAMERA_PERMISSION: Int = 200
+        private lateinit var mSurfaceTextureListener: TextureView.SurfaceTextureListener
     }
 
-    private val PICTURE_NAME = "Example"
+    private val PICTURE_NAME = "Example.jpeg"
     private val MAX_PREVIEW_WIDTH = 720
     private val MAX_PREVIEW_HEIGHT = 1280
     private lateinit var captureSession: CameraCaptureSession
@@ -42,8 +42,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var captureRequest: CaptureRequest
     private lateinit var backgroundHandler: Handler
     private lateinit var backgroundThread: HandlerThread
-    private lateinit var cameraDevice:CameraDevice
-    private lateinit var characteristics:CameraCharacteristics
+    private lateinit var cameraDevice: CameraDevice
+    private lateinit var characteristics: CameraCharacteristics
     private lateinit var imageReader: ImageReader
     private lateinit var file: File
     private var flashSupported = false
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 
-    private val deviceStateCallback = object: CameraDevice.StateCallback(){
+    private val deviceStateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
             Log.d(TAG, "Camera Device Opened")
             camera?.let {
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onDisconnected(camera: CameraDevice) {
             Log.d(TAG, "Camera Device Disconnected")
-            camera?.let { it.close()}
+            camera?.let { it.close() }
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
@@ -92,7 +92,8 @@ class MainActivity : AppCompatActivity() {
                     val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
                     if (aeState == null ||
                         aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
-                        aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
+                        aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED
+                    ) {
                         state = STATE_WAITING_NON_PRECAPTURE
                     }
                 }
@@ -111,7 +112,8 @@ class MainActivity : AppCompatActivity() {
             if (afState == null) {
                 captureStillPicture()
             } else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED
-                || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
+            ) {
                 val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
                 if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                     state = STATE_PICTURE_TAKEN
@@ -122,11 +124,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
+        override fun onCaptureProgressed(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            partialResult: CaptureResult
+        ) {
             process(partialResult)
         }
 
-        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+        override fun onCaptureCompleted(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            result: TotalCaptureResult
+        ) {
             process(result)
         }
 
@@ -140,7 +150,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Take a picture")
             lockFocus()
         }
-        mSurfaceTextureListener = object:TextureView.SurfaceTextureListener{
+        mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
             override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
 
             override fun onSurfaceTextureUpdated(p0: SurfaceTexture?) = Unit
@@ -168,9 +178,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         startBackgroundThread()
-        if(textureView.isAvailable){
+        if (textureView.isAvailable) {
             openCamera()
-        }else{
+        } else {
             initTextureView()
         }
     }
@@ -211,7 +221,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * preview에 대한 세션을 요청하고 생성한다.
      */
-    private fun previewSession(){
+    private fun previewSession() {
         val surfaceTexture = textureView.surfaceTexture
         surfaceTexture.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
         val surface = Surface(surfaceTexture)
@@ -222,8 +232,8 @@ class MainActivity : AppCompatActivity() {
             Arrays.asList(surface, imageReader?.surface),
             object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
-                    cameraCaptureSession.let {
-                        captureSession = cameraCaptureSession
+                    cameraCaptureSession?.let {
+                        captureSession = it
                         try {
                             captureRequestBuilder.set(
                                 CaptureRequest.CONTROL_AF_MODE,
@@ -254,24 +264,26 @@ class MainActivity : AppCompatActivity() {
      * 카메라 퍼미션을 체크한다.
      */
     @AfterPermissionGranted(REQUEST_CAMERA_PERMISSION)
-    private fun checkCameraPermission(){
-        if(EasyPermissions.hasPermissions(this.applicationContext, Manifest.permission.CAMERA)){
+    private fun checkCameraPermission() {
+        if (EasyPermissions.hasPermissions(this.applicationContext, Manifest.permission.CAMERA)) {
             Log.d(TAG, "This App has the CAMERA permission")
             connectionCamera()
-        }else{
-            EasyPermissions.requestPermissions(this,
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
                 getString(R.string.request_camera_permission),
                 REQUEST_CAMERA_PERMISSION,
-                Manifest.permission.CAMERA)
+                Manifest.permission.CAMERA
+            )
         }
     }
 
     /**
      * 요청 키 값에 따라, 카메라 렌즈방향/지원 사진크기 를 반환하여 준다.
      */
-    private fun <T> cameraCharacteristics(cameraId:String, key:CameraCharacteristics.Key<T>): T? {
-        characteristics= cameraManager.getCameraCharacteristics(cameraId)
-        return when (key){
+    private fun <T> cameraCharacteristics(cameraId: String, key: CameraCharacteristics.Key<T>): T? {
+        characteristics = cameraManager.getCameraCharacteristics(cameraId)
+        return when (key) {
             CameraCharacteristics.LENS_FACING -> characteristics.get(key)
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP -> characteristics.get(key)
             else -> throw IllegalArgumentException("정상적인 키 값이 필요합니다.")
@@ -281,12 +293,12 @@ class MainActivity : AppCompatActivity() {
     /**
      * 카메라 ID값을 반환한다.
      */
-    private fun cameraId(lens:Int) :String{
+    private fun cameraId(lens: Int): String {
         var deviceId = listOf<String>()
-        try{
+        try {
             val cameraIdList = cameraManager.cameraIdList
             deviceId = cameraIdList.filter { lens == cameraCharacteristics(it, CameraCharacteristics.LENS_FACING) }
-        } catch (e: CameraAccessException){
+        } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
         }
         return deviceId[0]
@@ -296,14 +308,14 @@ class MainActivity : AppCompatActivity() {
      * 카메라를 연결한다.
      */
     @SuppressLint("MissingPermission")
-    private fun connectionCamera(){
+    private fun connectionCamera() {
         val deviceId = cameraId(CameraCharacteristics.LENS_FACING_BACK)
         Log.d(TAG, "deviceId : $deviceId")
-        try{
+        try {
             cameraManager.openCamera(deviceId, deviceStateCallback, backgroundHandler)
-        }catch (e:CameraAccessException){
+        } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
-        }catch (e:InterruptedException){
+        } catch (e: InterruptedException) {
             Log.e(TAG, "Open camera device interrupted while opened")
         }
     }
@@ -315,13 +327,16 @@ class MainActivity : AppCompatActivity() {
         checkCameraPermission()
         flashSupported = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
         val map = characteristics.get(
-            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
+        )
         val largest = Collections.max(
             Arrays.asList(*map?.getOutputSizes(ImageFormat.JPEG)),
             CompareSizesByArea()
         )
-        imageReader = ImageReader.newInstance(largest.width, largest.height,
-            ImageFormat.JPEG, /*maxImages*/ 2).apply {
+        imageReader = ImageReader.newInstance(
+            largest.width, largest.height,
+            ImageFormat.JPEG, /*maxImages*/ 2
+        ).apply {
             setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
         }
     }
@@ -329,17 +344,17 @@ class MainActivity : AppCompatActivity() {
     /**
      * 카메라를 닫는다.
      */
-    private fun closeCamera(){
-        if(this::captureSession.isInitialized)
+    private fun closeCamera() {
+        if (this::captureSession.isInitialized)
             captureSession.close()
-        if(this::cameraDevice.isInitialized)
+        if (this::cameraDevice.isInitialized)
             cameraDevice.close()
     }
 
     /**
      * 카메라에 대한 요청을 처리하기 위한 background thread를 생성한다.
      */
-    private fun startBackgroundThread(){
+    private fun startBackgroundThread() {
         backgroundThread = HandlerThread("CameraHandlerThread").also { it.start() }
         backgroundHandler = Handler(backgroundThread.looper)
     }
@@ -347,12 +362,12 @@ class MainActivity : AppCompatActivity() {
     /**
      * 카메라에 대한 요청을 처리하던 background thread를 정지시킨다.
      */
-    private fun stopBackgroundThread(){
+    private fun stopBackgroundThread() {
         backgroundThread?.let {
             it.quitSafely()
-            try{
+            try {
                 it.join()
-            }catch (e:InterruptedException){
+            } catch (e: InterruptedException) {
                 Log.d(TAG, e.toString())
             }
 
@@ -361,33 +376,37 @@ class MainActivity : AppCompatActivity() {
 
     private fun captureStillPicture() {
         try {
-            if (cameraDevice == null) return
-            val rotation = this.windowManager.defaultDisplay.rotation
+            cameraDevice?.let {
+                val captureBuilder = it?.createCaptureRequest(
+                    CameraDevice.TEMPLATE_STILL_CAPTURE
+                )?.apply {
+                    addTarget(imageReader.surface)
 
-            val captureBuilder = cameraDevice?.createCaptureRequest(
-                CameraDevice.TEMPLATE_STILL_CAPTURE)?.apply {
-                addTarget(imageReader.surface)
+                    set(CaptureRequest.JPEG_ORIENTATION, 0)
+                    set(
+                        CaptureRequest.CONTROL_AF_MODE,
+                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                    )
+                }?.also { setAutoFlash(it) }
 
-                set(CaptureRequest.JPEG_ORIENTATION, 0)
-                set(CaptureRequest.CONTROL_AF_MODE,
-                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-            }?.also { setAutoFlash(it) }
+                val captureCallback = object : CameraCaptureSession.CaptureCallback() {
 
-            val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-
-                override fun onCaptureCompleted(session: CameraCaptureSession,
-                                                request: CaptureRequest,
-                                                result: TotalCaptureResult) {
-                    Toast.makeText(applicationContext, "Saved: $file", Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, file.toString())
-                    unlockFocus()
+                    override fun onCaptureCompleted(
+                        session: CameraCaptureSession,
+                        request: CaptureRequest,
+                        result: TotalCaptureResult
+                    ) {
+                        Toast.makeText(applicationContext, "Saved: $file", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, file.toString())
+                        unlockFocus()
+                    }
                 }
-            }
 
-            captureSession?.apply {
-                stopRepeating()
-                abortCaptures()
-                capture(captureBuilder?.build(), captureCallback, null)
+                captureSession?.apply {
+                    stopRepeating()
+                    abortCaptures()
+                    capture(captureBuilder?.build(), captureCallback, null)
+                }
             }
         } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
@@ -397,18 +416,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun setAutoFlash(requestBuilder: CaptureRequest.Builder) {
         if (flashSupported) {
-            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+            requestBuilder.set(
+                CaptureRequest.CONTROL_AE_MODE,
+                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
+            )
         }
     }
 
     private fun runPrecaptureSequence() {
         try {
-            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
-                CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
+            captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+                CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START
+            )
             state = STATE_WAITING_PRECAPTURE
-            captureSession?.capture(captureRequestBuilder.build(), captureCallback,
-                backgroundHandler)
+            captureSession?.capture(
+                captureRequestBuilder.build(), captureCallback,
+                backgroundHandler
+            )
         } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
         }
