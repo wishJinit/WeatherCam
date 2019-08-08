@@ -67,8 +67,8 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Camera Device Opened")
             camera?.let {
                 cameraDevice = it
-                previewSession()
             }
+            previewSession()
         }
 
         override fun onDisconnected(camera: CameraDevice) {
@@ -218,24 +218,34 @@ class MainActivity : AppCompatActivity() {
 
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         captureRequestBuilder.addTarget(surface)
-
-        cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader?.surface),
+        cameraDevice?.createCaptureSession(
+            Arrays.asList(surface, imageReader?.surface),
             object : CameraCaptureSession.StateCallback() {
-                override fun onConfigureFailed(session: CameraCaptureSession) {
-                    Log.e(TAG, "Create capture session failed!")
-                }
+                override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
+                    cameraCaptureSession.let {
+                        captureSession = cameraCaptureSession
+                        try {
+                            captureRequestBuilder.set(
+                                CaptureRequest.CONTROL_AF_MODE,
+                                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                            )
+                            setAutoFlash(captureRequestBuilder)
 
-                override fun onConfigured(session: CameraCaptureSession) {
-                    session?.let {
-                        captureSession = it
-                        captureRequestBuilder.set(
-                            CaptureRequest.CONTROL_AF_MODE,
-                            CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
-                        )
-                        captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null)
+                            captureRequest = captureRequestBuilder.build()
+                            captureSession?.setRepeatingRequest(
+                                captureRequest,
+                                captureCallback, backgroundHandler
+                            )
+                        } catch (e: CameraAccessException) {
+                            Log.e(TAG, e.toString())
+                        }
                     }
+
                 }
 
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    Log.d(TAG, "Create Capture Session Error")
+                }
             }, null
         )
     }
