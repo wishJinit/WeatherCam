@@ -217,4 +217,7 @@ fabric.properties
 
 !/gradle/wrapper/gradle-wrapper.jar
 
+# API Key File
+APIKey.kt
+
 # End of https://www.gitignore.io/api/kotlin,android,androidstudio
