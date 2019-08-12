@@ -8,8 +8,13 @@ import retrofit2.http.Query
 
 interface RetrofitConnection {
     @GET("data/2.5/weather")
-    fun weatherInfo(@Query("lat") lat:String,
-                    @Query("lon") lon:String,
-                    @Query("id") id:String)
+    fun weatherInfo(@Query("lat") lat:Double,
+                    @Query("lon") lon:Double,
+                    @Query("APPID") id:String)
+            : Call<JSONObject>
+
+    @GET("data/2.5/weather")
+    fun capitalCityInfo(@Query("q") capital:String,
+                    @Query("APPID") id:String)
             : Call<JSONObject>
 }

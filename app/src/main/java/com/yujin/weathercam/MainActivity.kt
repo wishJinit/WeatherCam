@@ -16,6 +16,8 @@ import android.view.TextureView
 import android.widget.Toast
 import com.yujin.weathercam.Camera.CompareSizesByArea
 import com.yujin.weathercam.Camera.ImageSaver
+import com.yujin.weathercam.Net.RetrofitClient
+import com.yujin.weathercam.Net.RetrofitConnection
 import com.yujin.weathercam.Util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AfterPermissionGranted
@@ -189,6 +191,11 @@ class MainActivity : AppCompatActivity() {
         closeCamera()
         stopBackgroundThread()
         super.onPause()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        RetrofitClient().bringWeatherData()
     }
 
     private fun initTextureView() {
