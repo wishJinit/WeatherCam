@@ -1,10 +1,10 @@
 package com.yujin.weathercam.Net
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.yujin.weathercam.Data.WeatherVO
+import com.yujin.weathercam.VO.WeatherVO
 import com.yujin.weathercam.Util.APIKey
 import com.yujin.weathercam.Util.Log
+import com.yujin.weathercam.Data.WeatherInfo
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -39,8 +39,12 @@ class RetrofitClient{
                 val weatherList = response.body()?.get("weather").toString()
                 val weather = JSONObject(JSONArray(weatherList).get(0).toString())
 
-                weatherInfo.weather = weather.get("main").toString()
-                weatherInfo.description = weather.get("description").toString()
+                weather.let {
+                    val weatherNm = it.get("main").toString()
+                    weatherInfo.weather = weatherNm
+                    weatherInfo.weather_kr = WeatherInfo.valueOf(weatherNm).weather_kr
+                    weatherInfo.description = it.get("description").toString()
+                }
             }
         }
 
