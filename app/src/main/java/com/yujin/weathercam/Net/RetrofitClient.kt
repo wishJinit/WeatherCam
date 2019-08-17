@@ -20,14 +20,15 @@ class RetrofitClient{
     lateinit var retrofit:Retrofit
     lateinit var service:RetrofitConnection
 
-    fun bringWeatherData(){
-        val weatherInfo:WeatherVO = WeatherVO()
-
+    init {
         retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
 
+    fun bringWeatherData(){
+        val weatherInfo:WeatherVO = WeatherVO()
         service = retrofit.create(RetrofitConnection::class.java)
         var data = service.weatherInfo(55.5,57.5, APIKey.WEATHER_KEY)
         val obj = object : Callback<JsonObject> {
