@@ -27,7 +27,7 @@ class RetrofitClient{
             .build()
     }
 
-    fun bringWeatherData(){
+    fun bringWeatherData() : WeatherVO{
         val weatherInfo:WeatherVO = WeatherVO()
         service = retrofit.create(RetrofitConnection::class.java)
         var data = service.weatherInfo(55.5,57.5, APIKey.WEATHER_KEY)
@@ -45,10 +45,13 @@ class RetrofitClient{
                     weatherInfo.weather = weatherNm
                     weatherInfo.weather_kr = WeatherInfo.valueOf(weatherNm).weather_kr
                     weatherInfo.description = it.get("description").toString()
+                    weatherInfo.filterColor = WeatherInfo.valueOf(weatherNm).RGBA
                 }
             }
         }
 
         data.enqueue(obj)
+
+        return weatherInfo
     }
 }
