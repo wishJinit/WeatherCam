@@ -3,6 +3,7 @@ package com.yujin.weathercam
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
@@ -16,9 +17,11 @@ import android.view.TextureView
 import android.widget.Toast
 import com.yujin.weathercam.Camera.CompareSizesByArea
 import com.yujin.weathercam.Camera.ImageSaver
+import com.yujin.weathercam.Data.WeatherInfo
 import com.yujin.weathercam.Net.RetrofitClient
 import com.yujin.weathercam.Net.RetrofitConnection
 import com.yujin.weathercam.Util.Log
+import com.yujin.weathercam.VO.WeatherVO
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -49,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageReader: ImageReader
     private lateinit var file: File
     private var flashSupported = false
+    private var weatherInfo: WeatherVO? = null
 
     private val STATE_PREVIEW = 0
     private val STATE_WAITING_LOCK = 1
@@ -195,7 +199,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        RetrofitClient().bringWeatherData()
+        weatherInfo = RetrofitClient().bringWeatherData()
+        weatherInfo?.let {
+            it.filterColor.let {
+                filterLayout.setBackgroundColor(Color.parseColor(it))
+            }
+        }
     }
 
     private fun initTextureView() {
