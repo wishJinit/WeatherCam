@@ -3,7 +3,6 @@ package com.yujin.weathercam
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
@@ -15,13 +14,12 @@ import android.os.HandlerThread
 import android.view.Surface
 import android.view.TextureView
 import android.widget.Toast
+import androidx.databinding.DataBindingUtil
 import com.yujin.weathercam.Camera.CompareSizesByArea
 import com.yujin.weathercam.Camera.ImageSaver
-import com.yujin.weathercam.Data.WeatherInfo
 import com.yujin.weathercam.Net.RetrofitClient
-import com.yujin.weathercam.Net.RetrofitConnection
 import com.yujin.weathercam.Util.Log
-import com.yujin.weathercam.VO.WeatherVO
+import com.yujin.weathercam.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -150,7 +148,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        binding.weather = weatherInfo
 
         take_picture_btn.setOnClickListener {
             Log.d(TAG, "Take a picture")
@@ -200,11 +199,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         weatherInfo = RetrofitClient().bringWeatherData()
-        weatherInfo?.let {
-            it.filterColor.let {
-                filterLayout.setBackgroundColor(Color.parseColor(it))
-            }
-        }
     }
 
     private fun initTextureView() {
