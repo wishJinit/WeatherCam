@@ -1,4 +1,4 @@
-package com.yujin.weathercam.VO
+package com.yujin.weathercam
 
 
 class WeatherVO{

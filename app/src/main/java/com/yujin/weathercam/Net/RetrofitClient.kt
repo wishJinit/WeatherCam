@@ -1,7 +1,7 @@
 package com.yujin.weathercam.Net
 
 import com.google.gson.JsonObject
-import com.yujin.weathercam.VO.WeatherVO
+import com.yujin.weathercam.WeatherVO
 import com.yujin.weathercam.Util.APIKey
 import com.yujin.weathercam.Util.Log
 import com.yujin.weathercam.Data.WeatherInfo
@@ -27,8 +27,8 @@ class RetrofitClient{
             .build()
     }
 
-    fun bringWeatherData() : WeatherVO{
-        val weatherInfo:WeatherVO = WeatherVO()
+    fun bringWeatherData() : WeatherVO {
+        val weatherInfo: WeatherVO = WeatherVO()
         service = retrofit.create(RetrofitConnection::class.java)
         var data = service.weatherInfo(55.5,57.5, APIKey.WEATHER_KEY)
         val obj = object : Callback<JsonObject> {
