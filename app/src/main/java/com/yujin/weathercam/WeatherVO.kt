@@ -1,9 +1,11 @@
 package com.yujin.weathercam
 
+import androidx.databinding.ObservableField
+
 
 class WeatherVO{
-    var weather:String? = null
-    var weather_kr:String? = null
-    var description:String? = null
-    var filterColor:String? = null
+    var weather:ObservableField<String>? = null
+    var weather_kr:ObservableField<String>? = null
+    var description:ObservableField<String>? = null
+    var filterColor:ObservableField<String>? = null
 }
