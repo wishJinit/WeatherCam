@@ -41,10 +41,10 @@ class RetrofitClient{
 
                 weather.let {
                     val weatherNm = it.get("main").toString()
-                    weatherInfo.weather?.set(weatherNm)
-                    weatherInfo.weather_kr?.set(WeatherInfo.valueOf(weatherNm).weather_kr)
-                    weatherInfo.description?.set(it.get("description").toString())
-                    weatherInfo.filterColor?.set(WeatherInfo.valueOf(weatherNm).RGBA)
+                    weatherInfo.weather.set(weatherNm)
+                    weatherInfo.weather_kr.set(WeatherInfo.valueOf(weatherNm).weather_kr)
+                    weatherInfo.description.set(it.get("description").toString())
+                    weatherInfo.filterColor.set(WeatherInfo.valueOf(weatherNm).RGBA)
                 }
             }
         }

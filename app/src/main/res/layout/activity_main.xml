@@ -82,7 +82,7 @@
                         android:paddingHorizontal="15dp"
                         android:background="#22111111"
                         android:textColor="@color/colorWhite"
-                        android:text="@{weather.weather_kr!=null ? weather.weather_kr: @string/app_name }"/>
+                        android:text="@{weather.weather_kr.get() != null ? weather.weather_kr: @string/app_name }"/>
 
             </RelativeLayout>
         </RelativeLayout>
