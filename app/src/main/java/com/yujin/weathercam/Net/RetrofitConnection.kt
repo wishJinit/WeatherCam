@@ -7,13 +7,17 @@ import retrofit2.http.Query
 
 interface RetrofitConnection {
     @GET("data/2.5/weather")
-    fun weatherInfo(@Query("lat") lat:Double,
-                    @Query("lon") lon:Double,
-                    @Query("APPID") id:String)
+    fun weatherInfo(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("APPID") id: String
+    )
             : Call<JsonObject>
 
     @GET("data/2.5/weather")
-    fun capitalCityInfo(@Query("q") capital:String,
-                    @Query("APPID") id:String)
+    fun capitalCityInfo(
+        @Query("q") capital: String,
+        @Query("APPID") id: String
+    )
             : Call<JsonObject>
 }

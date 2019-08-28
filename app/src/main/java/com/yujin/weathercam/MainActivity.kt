@@ -15,10 +15,8 @@ import android.view.Surface
 import android.view.TextureView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.ObservableField
 import com.yujin.weathercam.Camera.CompareSizesByArea
 import com.yujin.weathercam.Camera.ImageSaver
-import com.yujin.weathercam.Data.WeatherInfo
 import com.yujin.weathercam.Net.RetrofitClient
 import com.yujin.weathercam.Util.Log
 import com.yujin.weathercam.databinding.ActivityMainBinding
@@ -52,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageReader: ImageReader
     private lateinit var file: File
     private var flashSupported = false
-    private lateinit var weatherInfo:WeatherVO
+    private lateinit var weatherInfo: WeatherVO
 
     private val STATE_PREVIEW = 0
     private val STATE_WAITING_LOCK = 1

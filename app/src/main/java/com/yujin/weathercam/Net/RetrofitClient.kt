@@ -13,12 +13,12 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofitClient{
+class RetrofitClient {
     private val TAG = "RetrofitClient"
     private val BASE_URL = "http://api.openweathermap.org"
 
-    lateinit var retrofit:Retrofit
-    lateinit var service:RetrofitConnection
+    lateinit var retrofit: Retrofit
+    lateinit var service: RetrofitConnection
 
     init {
         retrofit = Retrofit.Builder()
@@ -29,7 +29,7 @@ class RetrofitClient{
 
     fun bringWeatherData(weatherInfo: WeatherVO) {
         service = retrofit.create(RetrofitConnection::class.java)
-        var data = service.weatherInfo(55.5,57.5, APIKey.WEATHER_KEY)
+        var data = service.weatherInfo(55.5, 57.5, APIKey.WEATHER_KEY)
         val obj = object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 t.message?.let { Log.d(TAG, it) }

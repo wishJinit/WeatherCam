@@ -3,7 +3,7 @@ package com.yujin.weathercam
 import androidx.databinding.ObservableField
 
 
-class WeatherVO{
+class WeatherVO {
     var weather = ObservableField<String>()
     var weather_kr = ObservableField<String>()
     var description = ObservableField<String>()
