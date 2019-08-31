@@ -25,6 +25,10 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
 import java.util.*
+import android.location.LocationManager
+import android.os.Looper
+import com.google.android.gms.location.*
+
 
 class MainActivity : AppCompatActivity() {
     init {
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = "MainActivity"
         const val REQUEST_CAMERA_PERMISSION: Int = 200
+        const val REQUEST_LOCATION_PERMISSION: Int = 300
         private lateinit var mSurfaceTextureListener: TextureView.SurfaceTextureListener
     }
 
@@ -50,6 +55,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageReader: ImageReader
     private lateinit var file: File
     private var flashSupported = false
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
 
     private val STATE_PREVIEW = 0
@@ -149,6 +157,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        setLocationData()
         weatherInfo = WeatherVO()
         binding.weather = weatherInfo
         binding.executePendingBindings()
@@ -157,6 +166,8 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Take a picture")
             lockFocus()
         }
+
+        checkLocationPermission()
         mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
             override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
 
@@ -195,12 +206,15 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
         super.onPause()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
         RetrofitClient().bringWeatherData(weatherInfo)
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
     }
 
     private fun initTextureView() {
@@ -228,6 +242,37 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, e.toString())
         }
 
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun setLocationData() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener {
+                it.let {
+                    Log.d(TAG, "${it.latitude} , ${it.longitude}")
+                }
+            }
+            .addOnFailureListener {
+                Log.e(TAG, "location error is ${it.message}")
+                it.printStackTrace()
+            }
+
+        locationRequest = LocationRequest.create()
+        locationRequest.run {
+            priority = LocationRequest.PRIORITY_LOW_POWER
+            interval = 30 * 60 * 1000
+        }
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult?.let {
+                    for (location in it.locations) {
+                        Log.d(TAG, "lat : ${location.latitude} , lon : ${location.longitude}")
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -286,6 +331,35 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.request_camera_permission),
                 REQUEST_CAMERA_PERMISSION,
                 Manifest.permission.CAMERA
+            )
+        }
+    }
+
+
+    /**
+     * GPS 퍼미션을 체크한다.
+     */
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    private fun checkLocationPermission() {
+        if (EasyPermissions.hasPermissions(this.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            Log.d(TAG, "This App has the GPS permission")
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                getString(R.string.request_location_permission),
+                REQUEST_LOCATION_PERMISSION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        }
+
+        if (EasyPermissions.hasPermissions(this.applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            Log.d(TAG, "This App has the GPS permission")
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                getString(R.string.request_location_permission),
+                REQUEST_LOCATION_PERMISSION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
         }
     }
