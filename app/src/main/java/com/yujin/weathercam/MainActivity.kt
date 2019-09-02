@@ -28,6 +28,7 @@ import java.util.*
 import android.location.LocationManager
 import android.os.Looper
 import com.google.android.gms.location.*
+import com.yujin.weathercam.VO.LocationVO
 
 
 class MainActivity : AppCompatActivity() {
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
+    private lateinit var locationInfo: LocationVO
 
     private val STATE_PREVIEW = 0
     private val STATE_WAITING_LOCK = 1
@@ -162,6 +164,8 @@ class MainActivity : AppCompatActivity() {
         binding.weather = weatherInfo
         binding.executePendingBindings()
 
+        locationInfo = LocationVO()
+
         take_picture_btn.setOnClickListener {
             Log.d(TAG, "Take a picture")
             lockFocus()
@@ -213,7 +217,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
-        RetrofitClient().bringWeatherData(weatherInfo)
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
     }
 
@@ -267,9 +270,11 @@ class MainActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult?.let {
-                    for (location in it.locations) {
-                        Log.d(TAG, "lat : ${location.latitude} , lon : ${location.longitude}")
-                    }
+                    val location = it.locations[0]
+                    locationInfo.lat = location.latitude
+                    locationInfo.lon = location.longitude
+                    Log.d(TAG, "lat : ${location.latitude} , lon : ${location.longitude}")
+                    RetrofitClient().bringWeatherData(weatherInfo, locationInfo)
                 }
             }
         }

@@ -5,6 +5,7 @@ import com.yujin.weathercam.WeatherVO
 import com.yujin.weathercam.Util.APIKey
 import com.yujin.weathercam.Util.Log
 import com.yujin.weathercam.Data.WeatherInfo
+import com.yujin.weathercam.VO.LocationVO
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -27,9 +28,9 @@ class RetrofitClient {
             .build()
     }
 
-    fun bringWeatherData(weatherInfo: WeatherVO) {
+    fun bringWeatherData(weatherInfo: WeatherVO, locationInfo: LocationVO) {
         service = retrofit.create(RetrofitConnection::class.java)
-        var data = service.weatherInfo(55.5, 57.5, APIKey.WEATHER_KEY)
+        var data = service.weatherInfo(locationInfo.lat, locationInfo.lon, APIKey.WEATHER_KEY)
         val obj = object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 t.message?.let { Log.d(TAG, it) }
