@@ -184,7 +184,9 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-        file = File(this.getExternalFilesDir(null), PICTURE_NAME)
+        val picturePath = "${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_PICTURES}/${getString(R.string.app_name)}"
+        val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}"
+        file = File(picturePath, pictureName)
 
         initTextureView()
     }
