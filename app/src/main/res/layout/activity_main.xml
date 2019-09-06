@@ -29,7 +29,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical">
                 <ImageButton
-                        android:id="@+id/button1"
+                        android:id="@+id/showGallery"
                         android:layout_width="35dp"
                         android:layout_height="35dp"
                         android:layout_marginLeft="20dp"
@@ -40,7 +40,7 @@
                         android:layout_height="0dp"
                         android:layout_weight="1"/>
                 <ImageButton
-                        android:id="@+id/button2"
+                        android:id="@+id/resizePreview"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
                         android:background="@drawable/change_screen_ratio_btn"/>
@@ -49,7 +49,7 @@
                         android:layout_height="0dp"
                         android:layout_weight="1"/>
                 <ImageButton
-                        android:id="@+id/button3"
+                        android:id="@+id/changeLens"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_marginRight="20dp"
