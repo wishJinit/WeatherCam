@@ -8,9 +8,6 @@ import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.ImageReader
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.view.Surface
 import android.view.TextureView
 import android.widget.Toast
@@ -26,7 +23,9 @@ import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
 import java.util.*
 import android.location.LocationManager
-import android.os.Looper
+import android.os.*
+import android.view.View
+import android.widget.RelativeLayout
 import com.google.android.gms.location.*
 import com.yujin.weathercam.VO.LocationVO
 
@@ -61,6 +60,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
+
+    private var ratio_flag = false
 
     private val STATE_PREVIEW = 0
     private val STATE_WAITING_LOCK = 1
@@ -169,6 +170,9 @@ class MainActivity : AppCompatActivity() {
         take_picture_btn.setOnClickListener {
             Log.d(TAG, "Take a picture")
             lockFocus()
+        }
+        resizePreview.setOnClickListener {
+            resizeTextureView(textureView)
         }
 
         checkLocationPermission()
@@ -531,5 +535,19 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, e.toString())
         }
 
+    }
+
+    private fun resizeTextureView(view: View){
+        var layoutParams: RelativeLayout.LayoutParams?
+        print(ratio_flag)
+        val height = if (ratio_flag){
+            (view.width * (4.0/3.0)).toInt()
+        } else {
+            view.width
+        }
+        ratio_flag = !ratio_flag
+        layoutParams = RelativeLayout.LayoutParams(view.width, height)
+
+        view.layoutParams = layoutParams
     }
 }
