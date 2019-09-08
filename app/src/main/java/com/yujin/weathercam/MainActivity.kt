@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationInfo: LocationVO
 
     private var ratio_flag = false
+    private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
 
     private val STATE_PREVIEW = 0
     private val STATE_WAITING_LOCK = 1
@@ -173,6 +174,17 @@ class MainActivity : AppCompatActivity() {
         }
         resizePreview.setOnClickListener {
             resizeTextureView(textureView)
+        }
+        changeLens.setOnClickListener {
+            lens_flag = when(lens_flag){
+                CameraCharacteristics.LENS_FACING_BACK -> CameraCharacteristics.LENS_FACING_FRONT
+                CameraCharacteristics.LENS_FACING_FRONT -> CameraCharacteristics.LENS_FACING_BACK
+                else -> CameraCharacteristics.LENS_FACING_BACK
+            }
+
+            closeCamera()
+            connectionCamera()
+            openCamera()
         }
 
         checkLocationPermission()
@@ -390,11 +402,11 @@ class MainActivity : AppCompatActivity() {
     /**
      * 카메라 ID값을 반환한다.
      */
-    private fun cameraId(lens: Int): String {
+    private fun cameraId(): String {
         var deviceId = listOf<String>()
         try {
             val cameraIdList = cameraManager.cameraIdList
-            deviceId = cameraIdList.filter { lens == cameraCharacteristics(it, CameraCharacteristics.LENS_FACING) }
+            deviceId = cameraIdList.filter { lens_flag == cameraCharacteristics(it, CameraCharacteristics.LENS_FACING) }
         } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
         }
@@ -406,7 +418,7 @@ class MainActivity : AppCompatActivity() {
      */
     @SuppressLint("MissingPermission")
     private fun connectionCamera() {
-        val deviceId = cameraId(CameraCharacteristics.LENS_FACING_BACK)
+        val deviceId = cameraId()
         Log.d(TAG, "deviceId : $deviceId")
         try {
             cameraManager.openCamera(deviceId, deviceStateCallback, backgroundHandler)
