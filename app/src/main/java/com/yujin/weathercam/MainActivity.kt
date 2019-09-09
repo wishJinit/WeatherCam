@@ -176,15 +176,15 @@ class MainActivity : AppCompatActivity() {
             resizeTextureView(textureView)
         }
         changeLens.setOnClickListener {
+            closeCamera()
+            connectionCamera()
+            openCamera()
+
             lens_flag = when(lens_flag){
                 CameraCharacteristics.LENS_FACING_BACK -> CameraCharacteristics.LENS_FACING_FRONT
                 CameraCharacteristics.LENS_FACING_FRONT -> CameraCharacteristics.LENS_FACING_BACK
                 else -> CameraCharacteristics.LENS_FACING_BACK
             }
-
-            closeCamera()
-            connectionCamera()
-            openCamera()
         }
 
         checkLocationPermission()
