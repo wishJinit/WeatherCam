@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
 
-    private var ratio_flag = false
+    private var ratio_flag = true
     private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
 
     private val STATE_PREVIEW = 0
@@ -199,6 +199,7 @@ class MainActivity : AppCompatActivity() {
         file = File(picturePath, pictureName)
 
         initTextureView()
+        resizeTextureView(textureView)
     }
 
     /**
