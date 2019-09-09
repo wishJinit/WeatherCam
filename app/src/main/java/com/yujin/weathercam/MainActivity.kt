@@ -173,18 +173,12 @@ class MainActivity : AppCompatActivity() {
             lockFocus()
         }
         resizePreview.setOnClickListener {
+            Log.d(TAG, "Change preview size")
             resizeTextureView(textureView)
         }
         changeLens.setOnClickListener {
-            closeCamera()
-            connectionCamera()
-            openCamera()
-
-            lens_flag = when(lens_flag){
-                CameraCharacteristics.LENS_FACING_BACK -> CameraCharacteristics.LENS_FACING_FRONT
-                CameraCharacteristics.LENS_FACING_FRONT -> CameraCharacteristics.LENS_FACING_BACK
-                else -> CameraCharacteristics.LENS_FACING_BACK
-            }
+            Log.d(TAG, "Change camera lens")
+            changeCameraLens()
         }
 
         checkLocationPermission()
@@ -561,5 +555,17 @@ class MainActivity : AppCompatActivity() {
         layoutParams = RelativeLayout.LayoutParams(view.width, height)
 
         view.layoutParams = layoutParams
+    }
+
+    private fun changeCameraLens(){
+        closeCamera()
+        connectionCamera()
+        openCamera()
+
+        lens_flag = when(lens_flag){
+            CameraCharacteristics.LENS_FACING_BACK -> CameraCharacteristics.LENS_FACING_FRONT
+            CameraCharacteristics.LENS_FACING_FRONT -> CameraCharacteristics.LENS_FACING_BACK
+            else -> CameraCharacteristics.LENS_FACING_BACK
+        }
     }
 }
