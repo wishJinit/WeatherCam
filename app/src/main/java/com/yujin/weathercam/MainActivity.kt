@@ -199,7 +199,6 @@ class MainActivity : AppCompatActivity() {
         file = File(picturePath, pictureName)
 
         initTextureView()
-        resizeTextureView(textureView)
     }
 
     /**
