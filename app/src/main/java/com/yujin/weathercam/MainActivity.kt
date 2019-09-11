@@ -22,7 +22,6 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
 import java.util.*
-import android.location.LocationManager
 import android.os.*
 import android.view.View
 import android.widget.RelativeLayout
@@ -194,7 +193,8 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-        val picturePath = "${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_PICTURES}/${getString(R.string.app_name)}"
+        val picturePath =
+            "${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_PICTURES}/${getString(R.string.app_name)}"
         val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}"
         file = File(picturePath, pictureName)
 
@@ -543,11 +543,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun resizeTextureView(view: View){
+    private fun resizeTextureView(view: View) {
         var layoutParams: RelativeLayout.LayoutParams?
         print(ratio_flag)
-        val height = if (ratio_flag){
-            (view.width * (4.0/3.0)).toInt()
+        val height = if (ratio_flag) {
+            (view.width * (4.0 / 3.0)).toInt()
         } else {
             view.width
         }
@@ -557,12 +557,12 @@ class MainActivity : AppCompatActivity() {
         view.layoutParams = layoutParams
     }
 
-    private fun changeCameraLens(){
+    private fun changeCameraLens() {
         closeCamera()
         connectionCamera()
         openCamera()
 
-        lens_flag = when(lens_flag){
+        lens_flag = when (lens_flag) {
             CameraCharacteristics.LENS_FACING_BACK -> CameraCharacteristics.LENS_FACING_FRONT
             CameraCharacteristics.LENS_FACING_FRONT -> CameraCharacteristics.LENS_FACING_BACK
             else -> CameraCharacteristics.LENS_FACING_BACK
