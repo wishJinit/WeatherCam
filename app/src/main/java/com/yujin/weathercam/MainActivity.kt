@@ -20,13 +20,13 @@ import com.yujin.weathercam.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_main.*
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-import java.io.File
 import java.util.*
 import android.os.*
 import android.view.View
 import android.widget.RelativeLayout
 import com.google.android.gms.location.*
 import com.yujin.weathercam.VO.LocationVO
+import java.io.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -71,6 +71,14 @@ class MainActivity : AppCompatActivity() {
     private var state = STATE_PREVIEW
 
     private val onImageAvailableListener = ImageReader.OnImageAvailableListener {
+        val rootFile = File("${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}")
+        if (!rootFile.exists()){
+            rootFile.mkdir()
+        }
+
+        val picturePath = Environment.getExternalStoragePublicDirectory(getString(R.string.app_name))
+        val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}.jpeg"
+        file = File(picturePath, pictureName)
         backgroundHandler?.post(ImageSaver(it.acquireNextImage(), file))
     }
     private val cameraManager by lazy {
@@ -193,10 +201,6 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-        val picturePath =
-            "${Environment.getExternalStorageDirectory().absolutePath}/${Environment.DIRECTORY_PICTURES}/${getString(R.string.app_name)}"
-        val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}"
-        file = File(picturePath, pictureName)
 
         initTextureView()
     }
