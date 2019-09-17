@@ -79,7 +79,8 @@ class MainActivity : AppCompatActivity() {
         val picturePath = Environment.getExternalStoragePublicDirectory(getString(R.string.app_name))
         val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}.jpeg"
         file = File(picturePath, pictureName)
-        backgroundHandler?.post(ImageSaver(it.acquireNextImage(), file))
+        backgroundHandler?.post(ImageSaver(it.acquireNextImage(), file, this.applicationContext))
+
     }
     private val cameraManager by lazy {
         this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
