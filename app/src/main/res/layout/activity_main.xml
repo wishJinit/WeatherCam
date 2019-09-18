@@ -61,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.7">
-            <TextureView
+            <com.yujin.weathercam.camera2basic.AutoFitTextureView
                     android:id="@+id/textureView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
