@@ -176,19 +176,7 @@ class MainActivity : AppCompatActivity() {
 
         locationInfo = LocationVO()
 
-        take_picture_btn.setOnClickListener {
-            Log.d(TAG, "Take a picture")
-            lockFocus()
-        }
-        resizePreview.setOnClickListener {
-            Log.d(TAG, "Change preview size")
-            resizeTextureView(textureView)
-        }
-        changeLens.setOnClickListener {
-            Log.d(TAG, "Change camera lens")
-            changeCameraLens()
-        }
-
+        setBtnOnClickListener()
         checkLocationPermission()
         mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
             override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
@@ -204,6 +192,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         initTextureView()
+    }
+
+
+    fun setBtnOnClickListener(){
+        take_picture_btn.setOnClickListener {
+            Log.d(TAG, "Take a picture")
+            lockFocus()
+        }
+        resizePreview.setOnClickListener {
+            Log.d(TAG, "Change preview size")
+            resizeTextureView(textureView)
+        }
+        changeLens.setOnClickListener {
+            Log.d(TAG, "Change camera lens")
+            changeCameraLens()
+        }
+        showGallery.setOnClickListener {
+            Log.d(TAG, "Show Gallery")
+            val intent = Intent(baseContext, GalleryActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     /**
