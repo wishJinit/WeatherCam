@@ -72,14 +72,14 @@ class MainActivity : AppCompatActivity() {
     private var state = STATE_PREVIEW
 
     private val onImageAvailableListener = ImageReader.OnImageAvailableListener {
-        val rootFile = File("${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}")
+        val rootFilePath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
+        val rootFile = File(rootFilePath)
         if (!rootFile.exists()){
             rootFile.mkdir()
         }
 
-        val picturePath = Environment.getExternalStoragePublicDirectory(getString(R.string.app_name))
         val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}.jpeg"
-        file = File(picturePath, pictureName)
+        file = File(rootFile, pictureName)
         backgroundHandler?.post(ImageSaver(it.acquireNextImage(), file, this.applicationContext))
 
     }
