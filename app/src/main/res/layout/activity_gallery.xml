@@ -12,20 +12,24 @@
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="60dp">
+
         <ImageView
                 android:src="@drawable/back_btn"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="15dp"
-        />
+                />
     </RelativeLayout>
+
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
         <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
             <TableLayout
                     android:id="@+id/tableLayout"
                     android:layout_width="match_parent"
@@ -37,6 +41,7 @@
         <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
             <ProgressBar
                     android:id="@+id/progressbar"
                     android:layout_width="50dp"

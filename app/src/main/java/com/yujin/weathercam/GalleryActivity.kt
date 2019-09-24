@@ -1,14 +1,10 @@
 package com.yujin.weathercam
 
-import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.TableRow
 import android.widget.Toast
@@ -17,7 +13,6 @@ import com.yujin.weathercam.VO.ImageVO
 import kotlinx.android.synthetic.main.activity_gallery.*
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStream
 
 class GalleryActivity : AppCompatActivity() {
     val TAG = "GalleryActivity"
