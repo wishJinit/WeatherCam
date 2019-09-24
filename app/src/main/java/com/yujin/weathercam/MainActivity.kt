@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
     private val onImageAvailableListener = ImageReader.OnImageAvailableListener {
         val rootFilePath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
         val rootFile = File(rootFilePath)
-        if (!rootFile.exists()){
+        if (!rootFile.exists()) {
             rootFile.mkdir()
         }
 
@@ -196,7 +196,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun setBtnOnClickListener(){
+    fun setBtnOnClickListener() {
         take_picture_btn.setOnClickListener {
             Log.d(TAG, "Take a picture")
             lockFocus()
