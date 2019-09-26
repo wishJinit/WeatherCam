@@ -1,6 +1,7 @@
 package com.yujin.weathercam
 
 import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -16,6 +17,7 @@ import java.io.FileInputStream
 
 class GalleryActivity : AppCompatActivity() {
     val TAG = "GalleryActivity"
+    var imageList = arrayOf<ImageVO>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +30,7 @@ class GalleryActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        updateGalleryView()
+        updateGalleryView(LoadGalleryImgTask(this))
     }
 
     override fun onStop() {
@@ -36,7 +38,7 @@ class GalleryActivity : AppCompatActivity() {
         hideProgress()
     }
 
-    fun updateGalleryView() {
+    fun updateGalleryView(loadGalleryImgTask: LoadGalleryImgTask) {
         showProgress()
         tableLayout.removeAllViews()
 
@@ -44,36 +46,11 @@ class GalleryActivity : AppCompatActivity() {
         val galleryDir = File(galleryPath)
 
         if (galleryDir.exists()) {
-            var imageCnt = 0
-            val imageList = arrayOf<ImageVO>()
-
-            var tableRow = TableRow(baseContext)
-            galleryDir.listFiles().forEachIndexed { index, file ->
-                if (file.exists() && file.isFile) {
-                    val imageView = ImageView(baseContext)
-                    val imageViewLayoutParams = TableRow.LayoutParams(200, 200)
-                    imageViewLayoutParams.setMargins(10, 5, 10, 5)
-                    imageView.layoutParams = imageViewLayoutParams
-                    imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-                    val inputStream = FileInputStream(file)
-                    val options = BitmapFactory.Options()
-                    options.inSampleSize = 2
-                    val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
-                    imageView.setImageBitmap(bitmap)
-                    tableRow.addView(imageView)
-
-                    if (index % 3 == 2) {
-                        tableLayout.addView(tableRow)
-                        tableRow = TableRow(baseContext)
-                    }
-
-                }
-            }
+            loadGalleryImgTask.execute(galleryDir)
         } else {
             Toast.makeText(baseContext, "갤러리에 접근할 수 없습니다.", Toast.LENGTH_SHORT).show()
             Log.e(TAG, "Gallery directory not found")
         }
-        hideProgress()
     }
 
     fun showProgress() {
@@ -82,5 +59,67 @@ class GalleryActivity : AppCompatActivity() {
 
     fun hideProgress() {
         progressbar.visibility = View.INVISIBLE
+    }
+
+
+    class LoadGalleryImgTask(galleryActivity: GalleryActivity) : AsyncTask<File, ImageVO, Void?>() {
+        var galleryActivity: GalleryActivity = galleryActivity
+
+        override fun doInBackground(vararg galleryDir: File): Void? {
+            var imageCnt = 0
+            var imageList = arrayOf<ImageVO>()
+            galleryDir[0].listFiles().forEachIndexed { index, file ->
+                if (file.exists() && file.isFile) {
+                    imageCnt++
+                    val imageVO = ImageVO(imageCnt, file)
+                    imageList += imageVO
+                }
+            }
+            galleryActivity.imageList = imageList
+            publishProgress(*imageList)
+
+            return null
+        }
+
+        override fun onProgressUpdate(vararg imageList: ImageVO) {
+            super.onProgressUpdate(*imageList)
+
+            val rowItemCount = 3
+            val verticalMargin = 3
+            val horizontalMargin = 5
+            val context = galleryActivity.baseContext
+            val tableLayout = galleryActivity.tableLayout
+            val listSize = (tableLayout.width - (horizontalMargin * (rowItemCount + 1))) / rowItemCount
+
+            var tableRow = TableRow(context)
+            imageList.forEachIndexed { index, imageVO ->
+                val imageView = ImageView(context)
+
+                val imageViewLayoutParams = TableRow.LayoutParams(listSize, listSize)
+                imageViewLayoutParams.setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
+
+                val inputStream = FileInputStream(imageVO.image)
+                val options = BitmapFactory.Options()
+                options.inSampleSize = 2
+                val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
+
+                imageView.layoutParams = imageViewLayoutParams
+                imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+                imageView.setImageBitmap(bitmap)
+                tableRow.addView(imageView)
+
+                if (index % rowItemCount == (rowItemCount - 1)) {
+                    tableLayout.addView(tableRow)
+                    tableRow = TableRow(context)
+                }
+            }
+
+            onPostExecute(null)
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+            galleryActivity.hideProgress()
+        }
     }
 }
