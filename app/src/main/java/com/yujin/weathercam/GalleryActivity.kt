@@ -1,5 +1,6 @@
 package com.yujin.weathercam
 
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
@@ -63,6 +64,7 @@ class GalleryActivity : AppCompatActivity() {
 
 
     class LoadGalleryImgTask(galleryActivity: GalleryActivity) : AsyncTask<File, ImageVO, Void?>() {
+        val TAG = "LoadGalleryImgTask"
         var galleryActivity: GalleryActivity = galleryActivity
 
         override fun doInBackground(vararg galleryDir: File): Void? {
@@ -106,6 +108,12 @@ class GalleryActivity : AppCompatActivity() {
                 imageView.layoutParams = imageViewLayoutParams
                 imageView.scaleType = ImageView.ScaleType.CENTER_CROP
                 imageView.setImageBitmap(bitmap)
+                imageView.setOnClickListener {
+                    Log.d(TAG, "Show Gallery")
+                    val intent = Intent(context, ImageActivity::class.java)
+                    intent.putExtra("imagePath", imageVO.image)
+                    galleryActivity.startActivity(intent)
+                }
                 tableRow.addView(imageView)
 
                 if (index % rowItemCount == (rowItemCount - 1)) {
