@@ -6,6 +6,7 @@ import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.view.View
 import android.widget.ImageView
 import android.widget.TableRow
@@ -24,23 +25,14 @@ class GalleryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gallery)
 
-        back_btn.setOnClickListener {
-            finish()
+        setEventListener()
+        showProgress()
+        Handler().post {
+            updateGalleryView(LoadGalleryImgTask(this))
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        updateGalleryView(LoadGalleryImgTask(this))
-    }
-
-    override fun onStop() {
-        super.onStop()
-        hideProgress()
-    }
-
     fun updateGalleryView(loadGalleryImgTask: LoadGalleryImgTask) {
-        showProgress()
         tableLayout.removeAllViews()
 
         val galleryPath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
@@ -51,6 +43,12 @@ class GalleryActivity : AppCompatActivity() {
         } else {
             Toast.makeText(baseContext, "갤러리에 접근할 수 없습니다.", Toast.LENGTH_SHORT).show()
             Log.e(TAG, "Gallery directory not found")
+        }
+    }
+
+    fun setEventListener() {
+        back_btn.setOnClickListener {
+            finish()
         }
     }
 
@@ -66,6 +64,11 @@ class GalleryActivity : AppCompatActivity() {
     class LoadGalleryImgTask(galleryActivity: GalleryActivity) : AsyncTask<File, ImageVO, Void?>() {
         val TAG = "LoadGalleryImgTask"
         var galleryActivity: GalleryActivity = galleryActivity
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+            galleryActivity.showProgress()
+        }
 
         override fun doInBackground(vararg galleryDir: File): Void? {
             var imageCnt = 0
@@ -89,6 +92,7 @@ class GalleryActivity : AppCompatActivity() {
             val rowItemCount = 3
             val verticalMargin = 3
             val horizontalMargin = 5
+            val sampleSize = 2
             val context = galleryActivity.baseContext
             val tableLayout = galleryActivity.tableLayout
             val listSize = (tableLayout.width - (horizontalMargin * (rowItemCount + 1))) / rowItemCount
@@ -102,7 +106,7 @@ class GalleryActivity : AppCompatActivity() {
 
                 val inputStream = FileInputStream(imageVO.image)
                 val options = BitmapFactory.Options()
-                options.inSampleSize = 2
+                options.inSampleSize = sampleSize
                 val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
 
                 imageView.layoutParams = imageViewLayoutParams
@@ -111,7 +115,7 @@ class GalleryActivity : AppCompatActivity() {
                 imageView.setOnClickListener {
                     Log.d(TAG, "Show Gallery")
                     val intent = Intent(context, ImageActivity::class.java)
-                    intent.putExtra("imagePath", imageVO.image)
+                    intent.putExtra("imagePath", imageVO.image.absolutePath)
                     galleryActivity.startActivity(intent)
                 }
                 tableRow.addView(imageView)
