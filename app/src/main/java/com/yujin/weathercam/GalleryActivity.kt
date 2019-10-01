@@ -26,23 +26,25 @@ class GalleryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_gallery)
 
         setEventListener()
-        showProgress()
-        Handler().post {
-            updateGalleryView(LoadGalleryImgTask(this))
+        updateGalleryView(LoadGalleryImgTask(this))
+    }
         }
     }
 
     fun updateGalleryView(loadGalleryImgTask: LoadGalleryImgTask) {
-        tableLayout.removeAllViews()
+        showProgress()
+        Handler().post {
+            tableLayout.removeAllViews()
 
-        val galleryPath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
-        val galleryDir = File(galleryPath)
+            val galleryPath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
+            val galleryDir = File(galleryPath)
 
-        if (galleryDir.exists()) {
-            loadGalleryImgTask.execute(galleryDir)
-        } else {
-            Toast.makeText(baseContext, "갤러리에 접근할 수 없습니다.", Toast.LENGTH_SHORT).show()
-            Log.e(TAG, "Gallery directory not found")
+            if (galleryDir.exists()) {
+                loadGalleryImgTask.execute(galleryDir)
+            } else {
+                Toast.makeText(baseContext, "갤러리에 접근할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                Log.e(TAG, "Gallery directory not found")
+            }
         }
     }
 
