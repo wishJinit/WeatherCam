@@ -28,6 +28,13 @@ class GalleryActivity : AppCompatActivity() {
         setEventListener()
         updateGalleryView(LoadGalleryImgTask(this))
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        data?.run {
+            if (getBooleanExtra("isDeletion", false)) {
+                updateGalleryView(LoadGalleryImgTask(this@GalleryActivity))
+            }
         }
     }
 
@@ -118,7 +125,7 @@ class GalleryActivity : AppCompatActivity() {
                     Log.d(TAG, "Show Gallery")
                     val intent = Intent(context, ImageActivity::class.java)
                     intent.putExtra("imagePath", imageVO.image.absolutePath)
-                    galleryActivity.startActivity(intent)
+                    galleryActivity.startActivityForResult(intent, 0)
                 }
                 tableRow.addView(imageView)
 
