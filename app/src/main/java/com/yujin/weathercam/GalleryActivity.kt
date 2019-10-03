@@ -101,7 +101,7 @@ class GalleryActivity : AppCompatActivity() {
             val rowItemCount = 3
             val verticalMargin = 3
             val horizontalMargin = 5
-            val sampleSize = 2
+            val sampleSize = 5
             val context = galleryActivity.baseContext
             val tableLayout = galleryActivity.tableLayout
             val listSize = (tableLayout.width - (horizontalMargin * (rowItemCount + 1))) / rowItemCount
