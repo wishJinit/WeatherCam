@@ -129,7 +129,7 @@ class GalleryActivity : AppCompatActivity() {
                 }
                 tableRow.addView(imageView)
 
-                if (index % rowItemCount == (rowItemCount - 1)) {
+                if ((index % rowItemCount == (rowItemCount - 1)) || (index == imageList.count() - 1)) {
                     tableLayout.addView(tableRow)
                     tableRow = TableRow(context)
                 }
