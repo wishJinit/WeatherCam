@@ -16,6 +16,7 @@ import com.yujin.weathercam.VO.ImageVO
 import kotlinx.android.synthetic.main.activity_gallery.*
 import java.io.File
 import java.io.FileInputStream
+import java.util.*
 
 class GalleryActivity : AppCompatActivity() {
     val TAG = "GalleryActivity"
@@ -82,7 +83,10 @@ class GalleryActivity : AppCompatActivity() {
         override fun doInBackground(vararg galleryDir: File): Void? {
             var imageCnt = 0
             var imageList = arrayOf<ImageVO>()
-            galleryDir[0].listFiles().forEachIndexed { index, file ->
+            val fileList = galleryDir[0].listFiles()
+            fileList.sortByDescending { it.lastModified() }
+
+            fileList.forEachIndexed { index, file ->
                 if (file.exists() && file.isFile) {
                     imageCnt++
                     val imageVO = ImageVO(imageCnt, file)
