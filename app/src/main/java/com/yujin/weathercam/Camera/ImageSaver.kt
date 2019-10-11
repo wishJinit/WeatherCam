@@ -26,7 +26,7 @@ internal class ImageSaver(
      * The file we save the image into.
      */
     private val file: File,
-    private val filterStr:String,
+    private val filterStr: String,
     private val context: Context
 ) : Runnable {
 
@@ -64,7 +64,7 @@ internal class ImageSaver(
         }
     }
 
-    fun displayImageInGallery(file: File, context:Context) {
+    private fun displayImageInGallery(file: File, context: Context) {
         val values = ContentValues()
 
         values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
