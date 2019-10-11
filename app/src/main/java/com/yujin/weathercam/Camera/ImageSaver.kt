@@ -8,6 +8,10 @@ import com.yujin.weathercam.Util.Log
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import com.zomato.photofilters.imageprocessors.Filter
+import com.zomato.photofilters.imageprocessors.subfilters.ColorOverlaySubFilter
 
 /**
  * Saves a JPEG [Image] into the specified [File].
@@ -22,18 +26,28 @@ internal class ImageSaver(
      * The file we save the image into.
      */
     private val file: File,
-    private val context:Context
+    private val filterStr:String,
+    private val context: Context
 ) : Runnable {
 
     override fun run() {
         val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
+
         var output: FileOutputStream? = null
         try {
-            output = FileOutputStream(file).apply {
-                write(bytes)
-            }
+            output = FileOutputStream(file)
+
+            val opts = BitmapFactory.Options()
+            opts.inMutable = true
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.count(), opts)
+
+            val filter = Filter()
+            filter.addSubFilter(ColorOverlaySubFilter(50,1f,0f,0f))
+            filter.processFilter(bitmap)
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output)
 
             displayImageInGallery(file, context)
         } catch (e: IOException) {

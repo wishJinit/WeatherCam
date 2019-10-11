@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
 
         val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}.jpeg"
         file = File(rootFile, pictureName)
-        backgroundHandler?.post(ImageSaver(it.acquireNextImage(), file, this.applicationContext))
+        backgroundHandler?.post(ImageSaver(it.acquireNextImage(), file, weatherInfo.filterColor.get()!!, this.applicationContext))
 
     }
     private val cameraManager by lazy {
