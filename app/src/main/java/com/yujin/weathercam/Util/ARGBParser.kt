@@ -7,10 +7,10 @@ class ARGBParser(argb: String) {
         private val TAG = "ARGBParser"
     }
 
-    private val defineFilter = "#00000000"
-    private val STR_LENGTH = defineFilter.count()
+    private val DEFINE_FILTER = "#00000000"
+    private val STR_LENGTH = DEFINE_FILTER.count()
 
-    var argb: String = defineFilter
+    var argb: String = DEFINE_FILTER
         set(value) {
             if (value.length == STR_LENGTH &&
                 value.startsWith("#") &&
@@ -18,7 +18,7 @@ class ARGBParser(argb: String) {
             ) {
                 field = value
             } else {
-                field = defineFilter
+                field = DEFINE_FILTER
             }
         }
 
