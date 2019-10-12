@@ -1,5 +1,6 @@
 package com.yujin.weathercam.Util
 
+import com.yujin.weathercam.Data.ARGBParserInfo
 import java.lang.Exception
 
 class ARGBParser(argb: String) {
@@ -9,6 +10,8 @@ class ARGBParser(argb: String) {
 
     private val DEFINE_FILTER = "#00000000"
     private val STR_LENGTH = DEFINE_FILTER.count()
+    val RADIX_HEX = 16
+    val HEX_MAX = "FF".toInt(RADIX_HEX).toFloat()
 
     var argb: String = DEFINE_FILTER
         set(value) {
@@ -27,9 +30,15 @@ class ARGBParser(argb: String) {
         this.argb = argb
     }
 
+    fun getHex(color: ARGBParserInfo):Int = argb.substring(color.start, color.end).toInt(RADIX_HEX)
+
+    fun getHexPercentageDecimal(color: ARGBParserInfo):Float = getHex(color)/HEX_MAX
+
+    fun getHexPercentage(color: ARGBParserInfo):Int = (getHexPercentageDecimal(color)*100).toInt()
+
     private fun isHex(hex: String): Boolean {
         try {
-            hex.toLong(16).toString()
+            hex.toLong(RADIX_HEX).toString()
             return true
         } catch (e: Exception) {
             Log.d(TAG, "Filter Color is not fit the format.")
