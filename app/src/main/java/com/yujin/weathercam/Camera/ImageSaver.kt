@@ -10,6 +10,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import android.graphics.BitmapFactory
 import android.graphics.Bitmap
+import com.yujin.weathercam.Data.ARGBParserInfo
+import com.yujin.weathercam.Util.ARGBParser
 import com.zomato.photofilters.imageprocessors.Filter
 import com.zomato.photofilters.imageprocessors.subfilters.ColorOverlaySubFilter
 
@@ -43,9 +45,7 @@ internal class ImageSaver(
             opts.inMutable = true
             val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.count(), opts)
 
-            val filter = Filter()
-            filter.addSubFilter(ColorOverlaySubFilter(50,1f,0f,0f))
-            filter.processFilter(bitmap)
+            setFilter(bitmap)
 
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output)
 
@@ -72,6 +72,18 @@ internal class ImageSaver(
         values.put(MediaStore.MediaColumns.DATA, file.absolutePath)
 
         context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+    }
+
+    private fun setFilter(bitmap: Bitmap) {
+        val argbParser = ARGBParser(filterStr)
+        val alpha = argbParser.getHexPercentage(ARGBParserInfo.ALPHA)
+        val red = argbParser.getHexPercentageDecimal(ARGBParserInfo.RED)
+        val green = argbParser.getHexPercentageDecimal(ARGBParserInfo.GREEN)
+        val blue = argbParser.getHexPercentageDecimal(ARGBParserInfo.BLUE)
+
+        val filter = Filter()
+        filter.addSubFilter(ColorOverlaySubFilter(alpha, red, green, blue))
+        filter.processFilter(bitmap)
     }
 
     companion object {
