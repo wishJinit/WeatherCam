@@ -3,6 +3,7 @@ package com.yujin.weathercam
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -33,6 +34,9 @@ class ImageActivity : AppCompatActivity() {
     fun setEventListener(){
         back_btn.setOnClickListener {
             closeActivity(false)
+        }
+        share_btn.setOnClickListener {
+            shareImage()
         }
         delete_btn.setOnClickListener {
             val dialog = AlertDialog.Builder(this)
@@ -73,5 +77,15 @@ class ImageActivity : AppCompatActivity() {
         intent.putExtra("isDeletion", isDeletion)
         setResult(0, intent)
         finish()
+    }
+
+    fun shareImage(){
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "image/jpeg"
+
+        val uri= Uri.fromFile(imageFile)
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
+
+        startActivity(Intent.createChooser(shareIntent, "${getString(R.string.app_name)} 이미지 공유"))
     }
 }
