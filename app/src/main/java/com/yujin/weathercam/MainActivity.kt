@@ -318,6 +318,11 @@ class MainActivity : AppCompatActivity() {
      * preview에 대한 세션을 요청하고 생성한다.
      */
     private fun previewSession() {
+        //lateinit property imageReader has not been initialized
+        if(!::imageReader.isInitialized){
+            setImageReader()
+        }
+
         val surfaceTexture = textureView.surfaceTexture
         surfaceTexture.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
         val surface = Surface(surfaceTexture)
@@ -325,7 +330,7 @@ class MainActivity : AppCompatActivity() {
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
         captureRequestBuilder.addTarget(surface)
         cameraDevice?.createCaptureSession(
-            Arrays.asList(surface, imageReader?.surface),
+            Arrays.asList(surface, imageReader.surface),
             object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
                     cameraCaptureSession?.let {
@@ -450,20 +455,9 @@ class MainActivity : AppCompatActivity() {
      */
     private fun openCamera() {
         checkCameraPermission()
+
         flashSupported = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-        val map = characteristics.get(
-            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
-        )
-        val largest = Collections.max(
-            Arrays.asList(*map?.getOutputSizes(ImageFormat.JPEG)),
-            CompareSizesByArea()
-        )
-        imageReader = ImageReader.newInstance(
-            largest.width, largest.height,
-            ImageFormat.JPEG, /*maxImages*/ 2
-        ).apply {
-            setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
-        }
+        setImageReader()
     }
 
     /**
@@ -537,6 +531,22 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, e.toString())
         }
 
+    }
+
+    fun setImageReader(){
+        val map = characteristics.get(
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
+        )
+        val largest = Collections.max(
+            Arrays.asList(*map?.getOutputSizes(ImageFormat.JPEG)),
+            CompareSizesByArea()
+        )
+        imageReader = ImageReader.newInstance(
+            largest.width, largest.height,
+            ImageFormat.JPEG, /*maxImages*/ 2
+        ).apply {
+            setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
+        }
     }
 
     private fun setAutoFlash(requestBuilder: CaptureRequest.Builder) {
