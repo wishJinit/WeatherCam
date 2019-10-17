@@ -208,10 +208,6 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Take a picture")
             lockFocus()
         }
-        resizePreview.setOnClickListener {
-            Log.d(TAG, "Change preview size")
-            resizeTextureView(textureView)
-        }
         changeLens.setOnClickListener {
             Log.d(TAG, "Change camera lens")
             changeCameraLens()

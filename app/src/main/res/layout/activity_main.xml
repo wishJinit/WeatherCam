@@ -13,63 +13,16 @@
                 type="com.yujin.weathercam.WeatherVO"/>
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:weightSum="1"
             android:background="@color/colorBlack"
             tools:context=".MainActivity">
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.1"
-                android:gravity="center"
-                >
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
-
-                <ImageButton
-                        android:id="@+id/showGallery"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:layout_marginLeft="20dp"
-                        android:background="@drawable/gallery"
-                        android:layout_gravity="left"/>
-
-                <View
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                <ImageButton
-                        android:id="@+id/resizePreview"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:background="@drawable/change_screen_ratio_btn"/>
-
-                <View
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                <ImageButton
-                        android:id="@+id/changeLens"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginRight="20dp"
-                        android:background="@drawable/lens_mode_btn"/>
-            </LinearLayout>
-        </LinearLayout>
-
         <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.7">
+                android:layout_height="match_parent"
+                android:background="@color/colorBlack"
+                >
 
             <com.yujin.weathercam.camera2basic.AutoFitTextureView
                     android:id="@+id/textureView"
@@ -101,18 +54,57 @@
             </RelativeLayout>
         </RelativeLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.2"
-                android:gravity="center">
+                android:layout_height="70dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                >
+
+            <ImageButton
+                    android:id="@+id/showGallery"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="20dp"
+                    android:background="@drawable/gallery"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/changeLens"/>
+
+
+            <ImageButton
+                    android:id="@+id/changeLens"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/lens_mode_btn"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/showGallery"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                >
 
             <ImageButton
                     android:id="@+id/take_picture_btn"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:background="@drawable/take_picture_btn"/>
-        </LinearLayout>
-
-    </LinearLayout>
+                    android:background="@drawable/take_picture_btn"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
