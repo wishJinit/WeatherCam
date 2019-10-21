@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
@@ -542,6 +543,15 @@ class MainActivity : AppCompatActivity() {
             ImageFormat.JPEG, /*maxImages*/ 2
         ).apply {
             setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
+        }
+
+        runOnUiThread {
+            val orientation = resources.configuration.orientation
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                textureView.setAspectRatio(largest.width, largest.height)
+            } else {
+                textureView.setAspectRatio(largest.height, largest.width)
+            }
         }
     }
 
