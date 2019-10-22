@@ -498,7 +498,8 @@ class MainActivity : AppCompatActivity() {
                 )?.apply {
                     addTarget(imageReader.surface)
 
-                    set(CaptureRequest.JPEG_ORIENTATION, 0)
+                    val rotation = this@MainActivity.windowManager.defaultDisplay.rotation
+                    set(CaptureRequest.JPEG_ORIENTATION, getJpegOrientation (rotation))
                     set(
                         CaptureRequest.CONTROL_AF_MODE,
                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
@@ -527,7 +528,25 @@ class MainActivity : AppCompatActivity() {
         } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
         }
+    }
 
+    private fun getJpegOrientation(_deviceOrientation:Int) : Int {
+        var deviceOrientation = _deviceOrientation
+        if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN) return 0
+        val sensorOrientation =  characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+
+        // Round device orientation to a multiple of 90
+        deviceOrientation = (deviceOrientation + 45) / 90 * 90;
+
+        // Reverse device orientation for front-facing cameras
+        val facingFront = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+        if (facingFront) deviceOrientation = -deviceOrientation;
+
+        // Calculate desired JPEG orientation relative to camera orientation to make
+        // the image upright relative to the device orientation
+        val jpegOrientation = ((sensorOrientation?.plus(deviceOrientation) ?: 0) + 360) % 360;
+
+        return jpegOrientation;
     }
 
     fun setImageReader(){
