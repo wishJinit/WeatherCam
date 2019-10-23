@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
+    private lateinit var toast:Toast
 
     private var ratio_flag = true
     private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
@@ -177,6 +178,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        toast = Toast.makeText(baseContext, "저장완료", Toast.LENGTH_SHORT)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         setLocationData()
         weatherInfo = WeatherVO()
@@ -249,6 +251,11 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
+    }
+
+    override fun onStop() {
+        toast.cancel()
+        super.onStop()
     }
 
     private fun initTextureView() {
@@ -513,7 +520,7 @@ class MainActivity : AppCompatActivity() {
                         request: CaptureRequest,
                         result: TotalCaptureResult
                     ) {
-                        Toast.makeText(applicationContext, "Saved: $file", Toast.LENGTH_SHORT).show()
+                        toast.show()
                         Log.d(TAG, file.toString())
                         unlockFocus()
                     }
