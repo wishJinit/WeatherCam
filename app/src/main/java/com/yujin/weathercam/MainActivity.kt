@@ -40,12 +40,8 @@ class MainActivity : AppCompatActivity() {
         private val TAG = "MainActivity"
         const val REQUEST_CAMERA_PERMISSION: Int = 200
         const val REQUEST_LOCATION_PERMISSION: Int = 300
-        private lateinit var mSurfaceTextureListener: TextureView.SurfaceTextureListener
     }
 
-    private val PICTURE_NAME = "Example.jpeg"
-    private val MAX_PREVIEW_WIDTH = 720
-    private val MAX_PREVIEW_HEIGHT = 1280
     private lateinit var captureSession: CameraCaptureSession
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
     private lateinit var captureRequest: CaptureRequest
@@ -55,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var characteristics: CameraCharacteristics
     private lateinit var imageReader: ImageReader
     private lateinit var file: File
-    private var flashSupported = false
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
@@ -65,6 +60,10 @@ class MainActivity : AppCompatActivity() {
 
     private var ratio_flag = true
     private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
+    private var flashSupported = false
+
+    private var maxPreviewWidth = 720
+    private var maxPreviewHeight = 1280
 
     private val STATE_PREVIEW = 0
     private val STATE_WAITING_LOCK = 1
@@ -72,6 +71,10 @@ class MainActivity : AppCompatActivity() {
     private val STATE_WAITING_NON_PRECAPTURE = 3
     private val STATE_PICTURE_TAKEN = 4
     private var state = STATE_PREVIEW
+
+    private val cameraManager by lazy {
+        this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }
 
     private val onImageAvailableListener = ImageReader.OnImageAvailableListener {
         val rootFilePath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
@@ -92,8 +95,18 @@ class MainActivity : AppCompatActivity() {
         )
 
     }
-    private val cameraManager by lazy {
-        this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+    private val mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
+        override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
+
+        override fun onSurfaceTextureUpdated(p0: SurfaceTexture?) = Unit
+
+        override fun onSurfaceTextureDestroyed(p0: SurfaceTexture?): Boolean = true
+
+        override fun onSurfaceTextureAvailable(p0: SurfaceTexture?, p1: Int, p2: Int) {
+            openCamera()
+        }
+
     }
 
     private val deviceStateCallback = object : CameraDevice.StateCallback() {
@@ -178,7 +191,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setDataBinding()
+        setBtnOnClickListener()
+        checkLocationPermission()
+        initTextureView()
+
         toast = Toast.makeText(baseContext, "저장완료", Toast.LENGTH_SHORT)
+    }
+
+    private fun setDataBinding() {
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         setLocationData()
         weatherInfo = WeatherVO()
@@ -186,27 +208,9 @@ class MainActivity : AppCompatActivity() {
         binding.executePendingBindings()
 
         locationInfo = LocationVO()
-
-        setBtnOnClickListener()
-        checkLocationPermission()
-        mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
-            override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
-
-            override fun onSurfaceTextureUpdated(p0: SurfaceTexture?) = Unit
-
-            override fun onSurfaceTextureDestroyed(p0: SurfaceTexture?): Boolean = true
-
-            override fun onSurfaceTextureAvailable(p0: SurfaceTexture?, p1: Int, p2: Int) {
-                openCamera()
-            }
-
-        }
-
-        initTextureView()
     }
 
-
-    fun setBtnOnClickListener() {
+    private fun setBtnOnClickListener() {
         take_picture_btn.setOnClickListener {
             Log.d(TAG, "Take a picture")
             lockFocus()
@@ -322,13 +326,10 @@ class MainActivity : AppCompatActivity() {
      * preview에 대한 세션을 요청하고 생성한다.
      */
     private fun previewSession() {
-        //lateinit property imageReader has not been initialized
-        if(!::imageReader.isInitialized){
-            setImageReader()
-        }
+        setImageReader()
 
         val surfaceTexture = textureView.surfaceTexture
-        surfaceTexture.setDefaultBufferSize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT)
+        surfaceTexture.setDefaultBufferSize(maxPreviewWidth, maxPreviewHeight)
         val surface = Surface(surfaceTexture)
 
         captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
@@ -340,10 +341,6 @@ class MainActivity : AppCompatActivity() {
                     cameraCaptureSession?.let {
                         captureSession = it
                         try {
-                            captureRequestBuilder.set(
-                                CaptureRequest.CONTROL_AF_MODE,
-                                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
-                            )
                             setAutoFlash(captureRequestBuilder)
 
                             captureRequest = captureRequestBuilder.build()
@@ -369,10 +366,10 @@ class MainActivity : AppCompatActivity() {
      * 카메라 퍼미션을 체크한다.
      */
     @AfterPermissionGranted(REQUEST_CAMERA_PERMISSION)
-    private fun checkCameraPermission() {
+    private fun checkCameraPermission(): Boolean {
         if (EasyPermissions.hasPermissions(this.applicationContext, Manifest.permission.CAMERA)) {
             Log.d(TAG, "This App has the CAMERA permission")
-            connectionCamera()
+            return true
         } else {
             EasyPermissions.requestPermissions(
                 this,
@@ -380,6 +377,7 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_CAMERA_PERMISSION,
                 Manifest.permission.CAMERA
             )
+            return false
         }
     }
 
@@ -458,10 +456,10 @@ class MainActivity : AppCompatActivity() {
      * 카메라 오픈을 요청한다.
      */
     private fun openCamera() {
-        checkCameraPermission()
-
+        if (checkCameraPermission()) {
+            connectionCamera()
+        }
         flashSupported = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
-        setImageReader()
     }
 
     /**
@@ -499,8 +497,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun captureStillPicture() {
         try {
-            cameraDevice?.let {
-                val captureBuilder = it?.createCaptureRequest(
+            if (!::imageReader.isInitialized) {
+                setImageReader()
+            }
+
+                val captureBuilder = cameraDevice.createCaptureRequest(
                     CameraDevice.TEMPLATE_STILL_CAPTURE
                 )?.apply {
                     addTarget(imageReader.surface)
@@ -556,7 +557,7 @@ class MainActivity : AppCompatActivity() {
         return jpegOrientation;
     }
 
-    fun setImageReader(){
+    fun setImageReader() {
         val map = characteristics.get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
         )
@@ -564,8 +565,12 @@ class MainActivity : AppCompatActivity() {
             Arrays.asList(*map?.getOutputSizes(ImageFormat.JPEG)),
             CompareSizesByArea()
         )
+
+        maxPreviewWidth = largest.width
+        maxPreviewHeight = largest.height
+
         imageReader = ImageReader.newInstance(
-            largest.width, largest.height,
+            maxPreviewWidth, maxPreviewHeight,
             ImageFormat.JPEG, /*maxImages*/ 2
         ).apply {
             setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
@@ -574,9 +579,9 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             val orientation = resources.configuration.orientation
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                textureView.setAspectRatio(largest.width, largest.height)
+                textureView.setAspectRatio(maxPreviewWidth, maxPreviewHeight)
             } else {
-                textureView.setAspectRatio(largest.height, largest.width)
+                textureView.setAspectRatio(maxPreviewHeight, maxPreviewWidth)
             }
         }
     }
