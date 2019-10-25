@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
-    private lateinit var toast:Toast
+    private lateinit var toast: Toast
 
     private var ratio_flag = true
     private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
@@ -501,53 +501,53 @@ class MainActivity : AppCompatActivity() {
                 setImageReader()
             }
 
-                val captureBuilder = cameraDevice.createCaptureRequest(
-                    CameraDevice.TEMPLATE_STILL_CAPTURE
-                )?.apply {
-                    addTarget(imageReader.surface)
+            val captureBuilder = cameraDevice.createCaptureRequest(
+                CameraDevice.TEMPLATE_STILL_CAPTURE
+            )?.apply {
+                addTarget(imageReader.surface)
 
-                    val rotation = this@MainActivity.windowManager.defaultDisplay.rotation
-                    set(CaptureRequest.JPEG_ORIENTATION, getJpegOrientation (rotation))
-                    set(
-                        CaptureRequest.CONTROL_AF_MODE,
-                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
-                    )
-                }?.also { setAutoFlash(it) }
+                val rotation = this@MainActivity.windowManager.defaultDisplay.rotation
+                set(CaptureRequest.JPEG_ORIENTATION, getJpegOrientation(rotation))
+                set(
+                    CaptureRequest.CONTROL_AF_MODE,
+                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                )
+            }?.also { setAutoFlash(it) }
 
-                val captureCallback = object : CameraCaptureSession.CaptureCallback() {
+            val captureCallback = object : CameraCaptureSession.CaptureCallback() {
 
-                    override fun onCaptureCompleted(
-                        session: CameraCaptureSession,
-                        request: CaptureRequest,
-                        result: TotalCaptureResult
-                    ) {
-                        toast.show()
-                        Log.d(TAG, file.toString())
-                        unlockFocus()
-                    }
+                override fun onCaptureCompleted(
+                    session: CameraCaptureSession,
+                    request: CaptureRequest,
+                    result: TotalCaptureResult
+                ) {
+                    toast.show()
+                    Log.d(TAG, file.toString())
+                    unlockFocus()
                 }
+            }
 
-                captureSession?.apply {
-                    stopRepeating()
-                    abortCaptures()
-                    capture(captureBuilder?.build(), captureCallback, null)
-                }
+            captureSession?.apply {
+                stopRepeating()
+                abortCaptures()
+                capture(captureBuilder?.build(), captureCallback, null)
             }
         } catch (e: CameraAccessException) {
             Log.e(TAG, e.toString())
         }
     }
 
-    private fun getJpegOrientation(_deviceOrientation:Int) : Int {
+    private fun getJpegOrientation(_deviceOrientation: Int): Int {
         var deviceOrientation = _deviceOrientation
         if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN) return 0
-        val sensorOrientation =  characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+        val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
         // Round device orientation to a multiple of 90
         deviceOrientation = (deviceOrientation + 45) / 90 * 90;
 
         // Reverse device orientation for front-facing cameras
-        val facingFront = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+        val facingFront =
+            characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
         if (facingFront) deviceOrientation = -deviceOrientation;
 
         // Calculate desired JPEG orientation relative to camera orientation to make

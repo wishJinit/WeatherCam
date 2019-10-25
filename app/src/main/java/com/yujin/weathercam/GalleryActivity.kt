@@ -16,7 +16,6 @@ import com.yujin.weathercam.VO.ImageVO
 import kotlinx.android.synthetic.main.activity_gallery.*
 import java.io.File
 import java.io.FileInputStream
-import java.util.*
 
 class GalleryActivity : AppCompatActivity() {
     val TAG = "GalleryActivity"

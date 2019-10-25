@@ -18,18 +18,18 @@ class RetrofitClient {
     private val TAG = "RetrofitClient"
     private val BASE_URL = "http://api.openweathermap.org"
 
-    lateinit var retrofit: Retrofit
-    lateinit var service: RetrofitConnection
+    private var retrofit: Retrofit
+    private var service: RetrofitConnection
 
     init {
         retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+        service = retrofit.create(RetrofitConnection::class.java)
     }
 
     fun bringWeatherData(weatherInfo: WeatherVO, locationInfo: LocationVO) {
-        service = retrofit.create(RetrofitConnection::class.java)
         var data = service.weatherInfo(locationInfo.lat, locationInfo.lon, APIKey.WEATHER_KEY)
         val obj = object : Callback<JsonObject> {
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
