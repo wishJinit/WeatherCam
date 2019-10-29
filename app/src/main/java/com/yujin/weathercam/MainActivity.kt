@@ -32,10 +32,6 @@ import java.io.*
 
 
 class MainActivity : AppCompatActivity() {
-    init {
-        System.loadLibrary("NativeImageProcessor")
-    }
-
     companion object {
         private val TAG = "MainActivity"
         const val REQUEST_CAMERA_PERMISSION: Int = 200
@@ -56,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
-    private lateinit var toast: Toast
+    private val toast: Toast
 
     private var ratio_flag = true
     private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
@@ -76,117 +72,128 @@ class MainActivity : AppCompatActivity() {
         this?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 
-    private val onImageAvailableListener = ImageReader.OnImageAvailableListener {
-        val rootFilePath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
-        val rootFile = File(rootFilePath)
-        if (!rootFile.exists()) {
-            rootFile.mkdir()
-        }
+    private val onImageAvailableListener:ImageReader.OnImageAvailableListener
+    private val mSurfaceTextureListener: TextureView.SurfaceTextureListener
+    private val deviceStateCallback: CameraDevice.StateCallback
+    private val captureCallback : CameraCaptureSession.CaptureCallback
 
-        val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}.jpeg"
-        file = File(rootFile, pictureName)
-        backgroundHandler?.post(
-            ImageSaver(
-                it.acquireNextImage(),
-                file,
-                weatherInfo.filterColor.get()!!,
-                this.applicationContext
-            )
-        )
+    init {
+        System.loadLibrary("NativeImageProcessor")
 
-    }
+        toast = Toast.makeText(baseContext, "저장완료", Toast.LENGTH_SHORT)
 
-    private val mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
-        override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
-
-        override fun onSurfaceTextureUpdated(p0: SurfaceTexture?) = Unit
-
-        override fun onSurfaceTextureDestroyed(p0: SurfaceTexture?): Boolean = true
-
-        override fun onSurfaceTextureAvailable(p0: SurfaceTexture?, p1: Int, p2: Int) {
-            openCamera()
-        }
-
-    }
-
-    private val deviceStateCallback = object : CameraDevice.StateCallback() {
-        override fun onOpened(camera: CameraDevice) {
-            Log.d(TAG, "Camera Device Opened")
-            camera?.let {
-                cameraDevice = it
+        onImageAvailableListener = ImageReader.OnImageAvailableListener {
+            val rootFilePath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
+            val rootFile = File(rootFilePath)
+            if (!rootFile.exists()) {
+                rootFile.mkdir()
             }
-            previewSession()
+
+            val pictureName = "${getString(R.string.app_name)}_${System.currentTimeMillis()}.jpeg"
+            file = File(rootFile, pictureName)
+            backgroundHandler?.post(
+                ImageSaver(
+                    it.acquireNextImage(),
+                    file,
+                    weatherInfo.filterColor.get()!!,
+                    this.applicationContext
+                )
+            )
+
         }
 
-        override fun onDisconnected(camera: CameraDevice) {
-            Log.d(TAG, "Camera Device Disconnected")
-            camera?.let { it.close() }
+        mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
+            override fun onSurfaceTextureSizeChanged(p0: SurfaceTexture?, p1: Int, p2: Int) {}
+
+            override fun onSurfaceTextureUpdated(p0: SurfaceTexture?) = Unit
+
+            override fun onSurfaceTextureDestroyed(p0: SurfaceTexture?): Boolean = true
+
+            override fun onSurfaceTextureAvailable(p0: SurfaceTexture?, p1: Int, p2: Int) {
+                openCamera()
+            }
+
         }
 
-        override fun onError(camera: CameraDevice, error: Int) {
-            Log.e(TAG, "camera device error (code : $error)")
+        deviceStateCallback = object : CameraDevice.StateCallback() {
+            override fun onOpened(camera: CameraDevice) {
+                Log.d(TAG, "Camera Device Opened")
+                camera?.let {
+                    cameraDevice = it
+                }
+                previewSession()
+            }
+
+            override fun onDisconnected(camera: CameraDevice) {
+                Log.d(TAG, "Camera Device Disconnected")
+                camera?.let { it.close() }
+            }
+
+            override fun onError(camera: CameraDevice, error: Int) {
+                Log.e(TAG, "camera device error (code : $error)")
+            }
+
         }
 
-    }
+        captureCallback = object : CameraCaptureSession.CaptureCallback() {
 
-    private val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-
-        private fun process(result: CaptureResult) {
-            when (state) {
-                STATE_PREVIEW -> Unit
-                STATE_WAITING_LOCK -> capturePicture(result)
-                STATE_WAITING_PRECAPTURE -> {
-                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-                    if (aeState == null ||
-                        aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
-                        aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED
-                    ) {
-                        state = STATE_WAITING_NON_PRECAPTURE
+            private fun process(result: CaptureResult) {
+                when (state) {
+                    STATE_PREVIEW -> Unit
+                    STATE_WAITING_LOCK -> capturePicture(result)
+                    STATE_WAITING_PRECAPTURE -> {
+                        val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
+                        if (aeState == null ||
+                            aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
+                            aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED
+                        ) {
+                            state = STATE_WAITING_NON_PRECAPTURE
+                        }
+                    }
+                    STATE_WAITING_NON_PRECAPTURE -> {
+                        val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
+                        if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                            state = STATE_PICTURE_TAKEN
+                            captureStillPicture()
+                        }
                     }
                 }
-                STATE_WAITING_NON_PRECAPTURE -> {
+            }
+
+            private fun capturePicture(result: CaptureResult) {
+                val afState = result.get(CaptureResult.CONTROL_AF_STATE)
+                if (afState == null) {
+                    captureStillPicture()
+                } else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED
+                    || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
+                ) {
                     val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                    if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                         state = STATE_PICTURE_TAKEN
                         captureStillPicture()
+                    } else {
+                        runPrecaptureSequence()
                     }
                 }
             }
-        }
 
-        private fun capturePicture(result: CaptureResult) {
-            val afState = result.get(CaptureResult.CONTROL_AF_STATE)
-            if (afState == null) {
-                captureStillPicture()
-            } else if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED
-                || afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
+            override fun onCaptureProgressed(
+                session: CameraCaptureSession,
+                request: CaptureRequest,
+                partialResult: CaptureResult
             ) {
-                val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-                if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                    state = STATE_PICTURE_TAKEN
-                    captureStillPicture()
-                } else {
-                    runPrecaptureSequence()
-                }
+                process(partialResult)
             }
-        }
 
-        override fun onCaptureProgressed(
-            session: CameraCaptureSession,
-            request: CaptureRequest,
-            partialResult: CaptureResult
-        ) {
-            process(partialResult)
-        }
+            override fun onCaptureCompleted(
+                session: CameraCaptureSession,
+                request: CaptureRequest,
+                result: TotalCaptureResult
+            ) {
+                process(result)
+            }
 
-        override fun onCaptureCompleted(
-            session: CameraCaptureSession,
-            request: CaptureRequest,
-            result: TotalCaptureResult
-        ) {
-            process(result)
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -197,7 +204,6 @@ class MainActivity : AppCompatActivity() {
         checkLocationPermission()
         initTextureView()
 
-        toast = Toast.makeText(baseContext, "저장완료", Toast.LENGTH_SHORT)
     }
 
     private fun setDataBinding() {
