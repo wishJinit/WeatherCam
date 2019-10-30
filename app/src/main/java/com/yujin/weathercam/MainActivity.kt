@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
-    private val toast: Toast
+    private lateinit var toast: Toast
 
     private var ratio_flag = true
     private var lens_flag = CameraCharacteristics.LENS_FACING_BACK
@@ -79,8 +79,6 @@ class MainActivity : AppCompatActivity() {
 
     init {
         System.loadLibrary("NativeImageProcessor")
-
-        toast = Toast.makeText(baseContext, "저장완료", Toast.LENGTH_SHORT)
 
         onImageAvailableListener = ImageReader.OnImageAvailableListener {
             val rootFilePath = "${Environment.getExternalStorageDirectory().absolutePath}/${getString(R.string.app_name)}"
@@ -200,10 +198,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setDataBinding()
+        setToast()
         setBtnOnClickListener()
         checkLocationPermission()
         initTextureView()
-
     }
 
     private fun setDataBinding() {
@@ -214,6 +212,10 @@ class MainActivity : AppCompatActivity() {
         binding.executePendingBindings()
 
         locationInfo = LocationVO()
+    }
+
+    private fun setToast(){
+        toast = Toast.makeText(baseContext, "저장완료", Toast.LENGTH_SHORT)
     }
 
     private fun setBtnOnClickListener() {
