@@ -28,7 +28,11 @@ import android.view.View
 import android.widget.RelativeLayout
 import com.google.android.gms.location.*
 import com.yujin.weathercam.VO.LocationVO
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.io.*
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -52,6 +56,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var weatherInfo: WeatherVO
     private lateinit var locationInfo: LocationVO
+    private lateinit var observable: Disposable
     private lateinit var toast: Toast
 
     private var ratio_flag = true
@@ -262,11 +267,17 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
+        observable = Observable.interval(0, 10, TimeUnit.MINUTES)
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                RetrofitClient().bringWeatherData(weatherInfo, locationInfo)
+            }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
     }
 
     override fun onStop() {
         toast.cancel()
+        observable.dispose()
         super.onStop()
     }
 
