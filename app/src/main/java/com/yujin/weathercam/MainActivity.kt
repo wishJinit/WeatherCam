@@ -597,11 +597,20 @@ class MainActivity : AppCompatActivity() {
 
         runOnUiThread {
             val orientation = resources.configuration.orientation
+            var ratio = 0f
+            var layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT)
+
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 textureView.setAspectRatio(maxPreviewWidth, maxPreviewHeight)
+                ratio = maxPreviewWidth.toFloat() / maxPreviewHeight.toFloat()
+                layoutParams= RelativeLayout.LayoutParams((textureView.width*ratio).toInt(), textureView.width)
             } else {
                 textureView.setAspectRatio(maxPreviewHeight, maxPreviewWidth)
+                ratio = maxPreviewHeight.toFloat() / maxPreviewWidth.toFloat()
+                layoutParams= RelativeLayout.LayoutParams(textureView.width, (textureView.width*ratio).toInt())
             }
+
+            filterLayout.layoutParams = layoutParams
         }
     }
 
