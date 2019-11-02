@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
-        observable = Observable.interval(0, 10, TimeUnit.MINUTES)
+        observable = Observable.interval(10, TimeUnit.MINUTES)
             .subscribeOn(Schedulers.io())
             .subscribe {
                 RetrofitClient().bringWeatherData(weatherInfo, locationInfo)
