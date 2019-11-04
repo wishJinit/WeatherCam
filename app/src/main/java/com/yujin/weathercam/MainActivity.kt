@@ -602,11 +602,11 @@ class MainActivity : AppCompatActivity() {
 
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 textureView.setAspectRatio(maxPreviewWidth, maxPreviewHeight)
-                ratio = maxPreviewWidth.toFloat() / maxPreviewHeight.toFloat()
+                ratio = maxPreviewHeight.toFloat() / maxPreviewWidth.toFloat()
                 layoutParams= RelativeLayout.LayoutParams((textureView.width*ratio).toInt(), textureView.width)
             } else {
                 textureView.setAspectRatio(maxPreviewHeight, maxPreviewWidth)
-                ratio = maxPreviewHeight.toFloat() / maxPreviewWidth.toFloat()
+                ratio = maxPreviewWidth.toFloat() / maxPreviewHeight.toFloat()
                 layoutParams= RelativeLayout.LayoutParams(textureView.width, (textureView.width*ratio).toInt())
             }
 
