@@ -51,5 +51,5 @@
 
 
 
-_E-mail : wishjinit@gmail.com_
+_E-mail : wishjinit@gmail.com<br/>_
 _Last Update : 2019.11.17_
